@@ -81,7 +81,7 @@ go.app = function() {
                                     faq_id: opts.faq_id
                                 }
                             };
-                        };
+                        }
                     });
                 });
         });

@@ -211,23 +211,6 @@ describe("app", function() {
             });
         });
 
-        describe("T2.d When the user chooses topic 52 (Coffee)", function() {
-            it("should increment topic coffee metric", function() {
-                return tester
-                    .setup.user.state('states_topics', {
-                        creator_opts: {
-                            faq_id: 1
-                        }
-                    })
-                    .input('1')
-                    .check(function(api) {
-                        var metrics = api.metrics.stores.test_metric_store;
-                        assert.deepEqual(metrics['test.faq_view_topic.52'].values, [1]);
-                    })
-                    .run();
-            });
-        });
-
         describe("T3.a When the user chooses question 635", function() {
             it("should show answer to question 635", function() {
                 return tester
@@ -245,24 +228,6 @@ describe("app", function() {
                             '1. More',
                             '2. Send to me by SMS'
                         ].join('\n')
-                    })
-                    .run();
-            });
-        });
-
-        describe("T3.b When the user views a question", function() {
-            it("should increment faq view metric", function() {
-                return tester
-                    .setup.user.state('states_questions', {
-                        creator_opts: {
-                            faq_id: 1
-                        }
-                    })
-                    .setup.user.answers({'states_topics': '52'})
-                    .input('2')
-                    .check(function(api) {
-                        var metrics = api.metrics.stores.test_metric_store;
-                        assert.deepEqual(metrics['test.faq_view_question'].values, [1]);
                     })
                     .run();
             });
@@ -415,22 +380,6 @@ describe("app", function() {
                         assert.equal(sms.content, 'foo');
                     })
                     .check.reply.ends_session()
-                    .run();
-            });
-
-            it("should fire sent via sms metric", function() {
-                return tester
-                    .setup.user.state('states_questions', {
-                        creator_opts: {
-                            faq_id: 1
-                        }
-                    })
-                    .setup.user.answers({'states_topics': '52'})
-                    .inputs('3', '1', '2')
-                    .check(function(api) {
-                        var metrics = api.metrics.stores.test_metric_store;
-                        assert.deepEqual(metrics['test.faq_sent_via_sms'].values, [1]);
-                    })
                     .run();
             });
         });

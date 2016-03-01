@@ -37,45 +37,6 @@ go.utils = {
         return (!_.isUndefined(bool) && (bool==='true' || bool===true));
     },
 
-    incr_user_extra: function(data_to_increment, amount_to_increment) {
-        if (_.isUndefined(data_to_increment)) {
-            new_data_amount = 1;
-        } else {
-            new_data_amount = parseInt(data_to_increment, 10) + amount_to_increment;
-        }
-        return new_data_amount.toString();
-    },
-
-    incr_kv: function(im, name) {
-        return im.api_request('kv.incr', {key: name, amount: 1})
-            .then(function(result){
-                return result.value;
-            });
-    },
-
-    decr_kv: function(im, name) {
-        return im.api_request('kv.incr', {key: name, amount: -1})
-            .then(function(result){
-                return result.value;
-            });
-    },
-
-    set_kv: function(im, name, value) {
-        return im.api_request('kv.set',  {key: name, value: value})
-            .then(function(result){
-                return result.value;
-            });
-    },
-
-    get_kv: function(im, name, default_value) {
-        // returns the default if null/undefined
-        return im.api_request('kv.get',  {key: name})
-            .then(function(result){
-                if(result.value === null) return default_value;
-                return result.value;
-            });
-    },
-
     get_snappy_faqs: function (im) {
         var http = new JsonApi(im, {
             auth: {
@@ -140,15 +101,6 @@ go.app = function() {
         App.call(self, 'states_start');
         var $ = self.$;
 
-        self.init = function() {
-            self.env = self.im.config.env;
-            return self.im.contacts
-                .for_user()
-                .then(function(user_contact) {
-                   self.contact = user_contact;
-                });
-        };
-
         // Start - select topic
         self.states.add('states_start', function(name) {
           if(self.im.config.snappy.default_faq) {
@@ -212,20 +164,12 @@ go.app = function() {
                         choices: choices,
                         options_per_page: 8,
                         next: function(choice) {
-                            return self.im.metrics.fire
-                                .inc([
-                                        self.env,
-                                        'faq_view_topic',
-                                        choice.value
-                                    ].join('.'), 1)
-                                .then(function() {
-                                    return {
-                                        name: 'states_questions',
-                                        creator_opts: {
-                                            faq_id: opts.faq_id
-                                        }
-                                    };
-                                });
+                            return {
+                                name: 'states_questions',
+                                creator_opts: {
+                                    faq_id: opts.faq_id
+                                }
+                            };
                         }
                     });
                 });
@@ -255,16 +199,12 @@ go.app = function() {
                                 var question_id = choice.value;
                                 var index = _.findIndex(response.data, { 'id': question_id});
                                 var answer = response.data[index].answer.trim();
-                                return self.im.metrics.fire
-                                    .inc([self.env, 'faq_view_question'].join('.'), 1)
-                                    .then(function() {
-                                        return {
-                                            name: 'states_answers',
-                                            creator_opts: {
-                                                answer: answer
-                                            }
-                                        };
-                                    });
+                                return {
+                                    name: 'states_answers',
+                                    creator_opts: {
+                                        answer: answer
+                                    }
+                                };
                             }
                         });
                     }
@@ -295,9 +235,6 @@ go.app = function() {
                     endpoint: 'sms',
                     content: opts.answer
                 })
-                .then(function() {
-                    return self.im.metrics.fire.inc([self.env, 'faq_sent_via_sms'].join('.'), 1);
-                })
                 .then(function () {
                     return self.states.create('states_end');
                 });
@@ -317,7 +254,6 @@ go.app = function() {
         GoFAQBrowser: GoFAQBrowser
     };
 }();
-
 
 go.init = function() {
     var vumigo = require('vumigo_v02');

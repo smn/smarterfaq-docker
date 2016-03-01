@@ -224,9 +224,9 @@ describe("app", function() {
                     .check.interaction({
                         state: 'states_answers',
                         reply: [
-                            'If the default box of 2 x 250g is not enough for your needs, you can increase the quantity up to 7 bags (or consider the',
+                            'If the default box of 2 x 250g is not enough for your needs, you can increase the quantity up to 7 bags (or consider the Bulk',
                             '1. More',
-                            '2. Send to me by SMS'
+                            '2. Exit'
                         ].join('\n')
                     })
                     .run();
@@ -274,9 +274,9 @@ describe("app", function() {
                     .check.interaction({
                         state: 'states_answers',
                         reply: [
-                            'It will be split into multiple pages on a bookletstate, showing content on different screens as the text gets too long. To',
+                            'It will be split into multiple pages on a bookletstate, showing content on different screens as the text gets too long. To illustrate',
                             '1. More',
-                            '2. Send to me by SMS'
+                            '2. Exit'
                         ].join('\n')
                     })
                     .run();
@@ -296,10 +296,10 @@ describe("app", function() {
                     .check.interaction({
                         state: 'states_answers',
                         reply: [
-                            'illustrate this, this super long response has been faked. This should be split over at least 2 screens just because we want',
+                            'this, this super long response has been faked. This should be split over at least 2 screens just because we want to test properly. Let\'s',
                             '1. More',
                             '2. Back',
-                            '3. Send to me by SMS'
+                            '3. Exit'
                         ].join('\n')
                     })
                     .run();
@@ -318,17 +318,17 @@ describe("app", function() {
                     .inputs('3', '1', '1', '1')
                     .check.interaction({
                         state: 'states_answers',
-                        reply: ['to test properly. Let\'s see.',
+                        reply: ['see.',
                             '1. Back',
-                            '2. Send to me by SMS'
+                            '2. Exit'
                         ].join('\n')
                     })
                     .run();
             });
         });
 
-        describe("T5. When the user chooses to Send by SMS", function() {
-            it("should thank the user, send sms, and exit", function() {
+        describe("T5. When the user chooses to exit", function() {
+            it("should thank the user, and exit", function() {
                 return tester
                     .setup.user.state('states_questions', {
                         creator_opts: {
@@ -339,21 +339,7 @@ describe("app", function() {
                     .inputs('3', '1', '2')
                     .check.interaction({
                         state: 'states_end',
-                        reply: ('Thank you. Your SMS will be delivered shortly.')
-                    })
-                    .check(function(api) {
-                        var smses = _.where(api.outbound.store, {
-                            endpoint: 'sms'
-                        });
-                        var sms = smses[0];
-                        assert.equal(smses.length, 1);
-                        assert.equal(sms.content,
-                            "It will be split into multiple pages on a bookletstate, showing " +
-                            "content on different screens as the text gets too long. To " +
-                            "illustrate this, this super long response has been faked. This " +
-                            "should be split over at least 2 screens just because we want to " +
-                            "test properly. Let\'s see."
-                        );
+                        reply: ('Thank you and visit again!')
                     })
                     .check.reply.ends_session()
                     .run();
@@ -361,23 +347,24 @@ describe("app", function() {
 
             it('should use a delegator state for sending the SMS', function () {
                 return tester
-                    .setup.user.state('states_send_sms', {
+                    .setup.user.state('states_answers', {
                         creator_opts: {
                             answer: 'foo'
                         }
                     })
-                    .input('hi')
+                    .input('1')  // the only option here is 'exit' because there's so little content
                     .check.interaction({
                         state: 'states_end',
-                        reply: ('Thank you. Your SMS will be delivered shortly.')
+                        reply: ('Thank you and visit again!')
                     })
                     .check(function(api) {
-                        var smses = _.where(api.outbound.store, {
-                            endpoint: 'sms'
-                        });
-                        var sms = smses[0];
-                        assert.equal(smses.length, 1);
-                        assert.equal(sms.content, 'foo');
+                        // NOTE: disabling because SMS outbound isn't working well enough for a demo
+                        // var smses = _.where(api.outbound.store, {
+                        //     endpoint: 'sms'
+                        // });
+                        // var sms = smses[0];
+                        // assert.equal(smses.length, 1);
+                        // assert.equal(sms.content, 'foo');
                     })
                     .check.reply.ends_session()
                     .run();

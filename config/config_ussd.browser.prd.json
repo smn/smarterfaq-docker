@@ -1,6 +1,0 @@
-{
-    "name": "snappy_browser",
-    "env": "prd",
-    "metric_store": "snappy_browser",
-    "endpoints": {"sms": {"delivery_class": "sms"}}
-}

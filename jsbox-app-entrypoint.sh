@@ -6,6 +6,23 @@ AMQP_VHOST=${AMQP_VHOST:-/}
 AMQP_USER=${AMQP_USER:-guest}
 AMQP_PASSWORD=${AMQP_PASSWORD:-guest}
 
+cat > ./config.json <<-EOM
+{
+    "name": "faqbrowser",
+    "snappy": {
+        "username": "${SNAPPY_USERNAME}",
+        "endpoint": "https://app.besnappy.com/api/v1/",
+        "account_id": "${SNAPPY_ACCOUNT_ID}",
+        "default_faq": "${SNAPPY_DEFAULT_FAQ}",
+    },
+    "endpoints": {
+        "sms": {
+            "delivery_class": "sms"
+        }
+    }
+}
+EOM
+
 twistd \
     -n vumi_worker \
     --worker-class vxsandbox.worker.StandaloneJsFileSandbox \

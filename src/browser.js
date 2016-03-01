@@ -12,15 +12,6 @@ go.app = function() {
         App.call(self, 'states_start');
         var $ = self.$;
 
-        self.init = function() {
-            self.env = self.im.config.env;
-            return self.im.contacts
-                .for_user()
-                .then(function(user_contact) {
-                   self.contact = user_contact;
-                });
-        };
-
         // Start - select topic
         self.states.add('states_start', function(name) {
           if(self.im.config.snappy.default_faq) {
@@ -84,21 +75,13 @@ go.app = function() {
                         choices: choices,
                         options_per_page: 8,
                         next: function(choice) {
-                            return self.im.metrics.fire
-                                .inc([
-                                        self.env,
-                                        'faq_view_topic',
-                                        choice.value
-                                    ].join('.'), 1)
-                                .then(function() {
-                                    return {
-                                        name: 'states_questions',
-                                        creator_opts: {
-                                            faq_id: opts.faq_id
-                                        }
-                                    };
-                                });
-                        }
+                            return {
+                                name: 'states_questions',
+                                creator_opts: {
+                                    faq_id: opts.faq_id
+                                }
+                            };
+                        };
                     });
                 });
         });
@@ -127,16 +110,12 @@ go.app = function() {
                                 var question_id = choice.value;
                                 var index = _.findIndex(response.data, { 'id': question_id});
                                 var answer = response.data[index].answer.trim();
-                                return self.im.metrics.fire
-                                    .inc([self.env, 'faq_view_question'].join('.'), 1)
-                                    .then(function() {
-                                        return {
-                                            name: 'states_answers',
-                                            creator_opts: {
-                                                answer: answer
-                                            }
-                                        };
-                                    });
+                                return {
+                                    name: 'states_answers',
+                                    creator_opts: {
+                                        answer: answer
+                                    }
+                                };
                             }
                         });
                     }
@@ -167,9 +146,6 @@ go.app = function() {
                     endpoint: 'sms',
                     content: opts.answer
                 })
-                .then(function() {
-                    return self.im.metrics.fire.inc([self.env, 'faq_sent_via_sms'].join('.'), 1);
-                })
                 .then(function () {
                     return self.states.create('states_end');
                 });
@@ -189,4 +165,3 @@ go.app = function() {
         GoFAQBrowser: GoFAQBrowser
     };
 }();
-

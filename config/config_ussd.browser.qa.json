@@ -1,0 +1,6 @@
+{
+    "name": "snappy_browser_qa",
+    "env": "qa",
+    "metric_store": "snappy_browser_qa",
+    "endpoints": {"sms": {"delivery_class": "sms"}}
+}

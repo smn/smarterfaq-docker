@@ -13,7 +13,7 @@ cat > ./config.json <<-EOM
         "username": "${SNAPPY_USERNAME}",
         "endpoint": "https://app.besnappy.com/api/v1/",
         "account_id": "${SNAPPY_ACCOUNT_ID}",
-        "default_faq": "${SNAPPY_DEFAULT_FAQ}",
+        "default_faq": "${SNAPPY_DEFAULT_FAQ}"
     },
     "endpoints": {
         "sms": {
@@ -22,6 +22,8 @@ cat > ./config.json <<-EOM
     }
 }
 EOM
+
+cat config.json
 
 twistd \
     -n vumi_worker \

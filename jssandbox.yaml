@@ -10,7 +10,7 @@
 
 worker_name: jsbox_application
 transport_name: faqbrowser
-javascript_file: go-app-browser.js
+javascript_file: /usr/local/lib/node_modules/go-snappy-faq-browser/go-app-browser.js
 sandbox_id: sandbox1
 executable: /usr/bin/node
 

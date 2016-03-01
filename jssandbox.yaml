@@ -1,0 +1,42 @@
+# A jssandbox image that takes in javascript from a file
+#
+# Note:
+#   The application must be linked in as `/app/app.js`
+#   The application config must be linked in as `/app/config.json`
+#   Redis container must be linked as `redis`
+#   RabbitMQ container must be linked as `rabbitmq`
+
+# application configuration
+
+worker_name: jsbox_application
+transport_name: faqbrowser
+javascript_file: go-app-browser.js
+sandbox_id: sandbox1
+executable: /usr/bin/node
+
+app_context: "{require: function(m) { if (['moment', 'url', 'querystring', 'crypto', 'lodash', 'q', 'jed', 'vumigo_v01', 'vumigo_v02', 'go-jsbox-location', 'go-jsbox-metrics-helper', 'go-jsbox-ona', 'go-jsbox-xform'].indexOf(m) >= 0) return require(m); return null; }, Buffer: Buffer}"
+
+rlimits:
+  RLIMIT_DATA: [67108864, 67108864] # 64 MB
+  RLIMIT_STACK: [2097152, 2097152] # 2 MB
+  RLIMIT_AS: [268435456, 268435456] # 256 MB
+
+sandbox:
+  config:
+    cls: vxsandbox.resources.config.FileConfigResource
+    keys:
+      config: config.json
+  http:
+    cls: vxsandbox.resources.http.HttpClientResource
+  outbound:
+    cls: vxsandbox.resources.outbound.OutboundResource
+    allowed_helper_metadata:
+      - outbound
+
+# middleware configuration
+
+middleware:
+  - logging_mw: vumi.middleware.logging.LoggingMiddleware
+
+logging_mw:
+  log_level: debug

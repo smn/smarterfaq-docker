@@ -26,6 +26,14 @@ sandbox:
     cls: vxsandbox.resources.config.FileConfigResource
     keys:
       config: config.json
+  kv:
+    cls: vxsandbox.resources.kv.RedisResource
+    redis_manager:
+      key_prefix: "vumi.jsbox.kv"
+      db: 1
+      host: 'redis.service.consul'
+      port: 6379
+    keys_per_user: 550000
   http:
     cls: vxsandbox.resources.http.HttpClientResource
   outbound:

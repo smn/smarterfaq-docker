@@ -126,6 +126,7 @@ go.app = function() {
         self.states.add('states_answers', function(name, opts) {
             return new PaginatedState(name, {
                 text: opts.answer,
+                characters_per_page: 800,
                 more: $('More'),
                 back: $('Back'),
                 exit: $('Exit'),

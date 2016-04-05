@@ -2,7 +2,8 @@ FROM praekeltfoundation/vxsandbox
 MAINTAINER Praekelt Foundation <dev@praekeltfoundation.org>
 
 # Install nodejs dependencies
-COPY package.json /app/package.json
+COPY . /app
+ENV CONFIG_FILE "jssandbox.yaml"
 WORKDIR /app
 RUN apt-get-install.sh npm && \
     npm install --production && \

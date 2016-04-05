@@ -1,4 +1,4 @@
-ROM praekeltfoundation/vxsandbox
+FROM praekeltfoundation/vxsandbox
 MAINTAINER Praekelt Foundation <dev@praekeltfoundation.org>
 
 # Install nodejs dependencies

@@ -13,5 +13,6 @@ RUN apt-get-install.sh npm && \
 # See https://github.com/praekelt/vumi-sandbox/issues/15
 RUN mv ./node_modules /usr/local/lib/
 
-# Copy in the app Javascript
-COPY go-*.js /app/
+ENTRYPOINT ["./jsbox-app-entrypoint.sh"]
+
+CMD []

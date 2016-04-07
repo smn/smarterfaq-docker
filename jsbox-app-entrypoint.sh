@@ -25,6 +25,8 @@ EOM
 
 cat config.json
 
+SET_OPTS=$(env | grep ^VUMI_OPT_ | sed -e 's/^VUMI_OPT_//' -e 's/=/ /' | awk '{printf("%s=%s:%s ", "--set-option", tolower($1), $2);}')
+
 twistd \
     -n vumi_worker \
     --worker-class vxsandbox.worker.StandaloneJsFileSandbox \
@@ -33,4 +35,6 @@ twistd \
     --vhost $AMQP_VHOST \
     --username $AMQP_USER \
     --password $AMQP_PASSWORD \
-    --config jssandbox.yaml
+    --config jssandbox.yaml \
+    $SET_OPTS \
+    "$@"

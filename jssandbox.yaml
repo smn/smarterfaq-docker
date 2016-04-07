@@ -9,7 +9,6 @@
 # application configuration
 
 worker_name: jsbox_application
-transport_name: messenger_transport
 javascript_file: /app/go-app-browser.js
 sandbox_id: sandbox1
 executable: /usr/bin/node

@@ -39,6 +39,7 @@ sandbox:
     cls: vxsandbox.resources.outbound.OutboundResource
     allowed_helper_metadata:
       - sms
+      - load_balancer
 
 # middleware configuration
 

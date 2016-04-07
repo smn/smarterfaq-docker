@@ -16,7 +16,10 @@ cat > ./config.json <<-EOM
         "default_faq": "${SNAPPY_DEFAULT_FAQ}"
     },
     "endpoints": {
-        "sms": {
+        "messenger": {
+            "delivery_class": "sms"
+        },
+        "facebook": {
             "delivery_class": "sms"
         }
     }

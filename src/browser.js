@@ -13,6 +13,10 @@ go.app = function() {
 
         opts = _.defaults(opts || {}, {
             helper_metadata: function () {
+                // just disable for now
+                if(true)
+                    return {};
+
                 if (opts.choices.length > 3) {
                     return {};
                 }
@@ -49,6 +53,10 @@ go.app = function() {
 
         opts = _.defaults(opts || {}, {
             helper_metadata: function () {
+                // just disable for now
+                if(true)
+                    return {};
+
                 var i18n = self.im.user.i18n;
                 var i = self.metadata.page;
                 var text = i18n(self.text);

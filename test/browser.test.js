@@ -52,7 +52,7 @@ describe("app", function() {
                     .check.interaction({
                         state: 'states_faqs',
                         reply: [
-                            'Welcome to FAQ Browser. Choose FAQ:',
+                            'Please choose a category:',
                             '1. English',
                             '2. French'
                         ].join('\n')
@@ -68,7 +68,7 @@ describe("app", function() {
                     .check.interaction({
                         state: 'states_faqs',
                         reply: [
-                            'Welcome to FAQ Browser. Choose FAQ:',
+                            'Please choose a category:',
                             '1. English',
                             '2. French'
                         ].join('\n')
@@ -115,7 +115,8 @@ describe("app", function() {
                         "endpoint": "https://app.besnappy.com/api/v1/",
                         "username": "980d2423-292b-4c34-be81-c74784b9e99a",
                         "account_id": "1",
-                        "default_faq": "1"
+                        "default_faq": "1",
+                        "default_label": "Useless",
                     }
                 })
                 .setup(function(api) {
@@ -133,7 +134,7 @@ describe("app", function() {
                     .check.interaction({
                         state: 'states_topics',
                         reply: [
-                            'Welcome to FAQ Browser. Choose topic:',
+                            'Please choose a Useless topic:',
                             '1. Coffee',
                             '2. Subscriptions',
                             '3. Refund',

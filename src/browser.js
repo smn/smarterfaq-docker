@@ -2,11 +2,90 @@
 go.app = function() {
     var vumigo = require('vumigo_v02');
     var _ = require('lodash');
+    var Q = require('q');
     var App = vumigo.App;
     var Choice = vumigo.states.Choice;
     var EndState = vumigo.states.EndState;
     var PaginatedState = vumigo.states.PaginatedState;
     var PaginatedChoiceState = vumigo.states.PaginatedChoiceState;
+
+    var MessengerChoiceState = PaginatedChoiceState.extend(function(self, name, opts) {
+        opts = _.defaults(opts || {}, {
+            helper_metadata: function () {
+
+                var i18n = self.im.user.i18n;
+                if (opts.choices.length > 3) {
+                    subtitle = self.display();
+                    buttons = [];
+                } else {
+                    subtitle = i18n(opts.question);
+                    buttons = opts.choices.map(function(choice, index) {
+                        return {
+                            title: i18n(choice.label),
+                            payload: {
+                                content: (index + 1) + '',
+                                in_reply_to: self.im.msg.message_id || null,
+                            }
+                        };
+                    });
+                }
+
+                return {
+                    messenger: {
+                        template_type: 'generic',
+                        title: i18n(opts.title),
+                        subtitle: subtitle,
+                        image_url: opts.image_url || '',
+                        buttons: buttons
+                    }
+                };
+            }
+        });
+
+        PaginatedChoiceState.call(self, name, opts);
+
+    });
+
+    var MessengerPaginatedState = PaginatedState.extend(function (self, name, opts) {
+
+        opts = _.defaults(opts || {}, {
+            helper_metadata: function () {
+                var i18n = self.im.user.i18n;
+                var i = self.metadata.page;
+                var text = i18n(self.text);
+                var choices = _.mapValues(self.choices, i18n);
+                var n = self._chars(choices);
+
+                return Q
+                    .all([
+                        self.page(i, text, n),
+                        self.page(i + 1, text, n)])
+                    .spread(function(text, more) {
+                        return self._determine_choices(i < 1, !more);
+                    })
+                    .then(function (choices) {
+                        return {
+                            messenger: {
+                                template_type: 'generic',
+                                title: i18n(opts.title),
+                                subtitle: i18n(opts.text),
+                                image_url: opts.image_url || '',
+                                buttons: choices.map(function(choice, index) {
+                                    return {
+                                        title: i18n(choice.label),
+                                        payload: {
+                                            content: '' + (index + 1),
+                                            in_reply_to: self.im.msg.message_id || null,
+                                        }
+                                    };
+                                })
+                            }
+                        };
+                    });
+            }
+        });
+        PaginatedState.call(self, name, opts);
+    });
 
     var GoFAQBrowser = App.extend(function(self) {
         App.call(self, 'states_start');
@@ -16,7 +95,8 @@ go.app = function() {
         self.states.add('states_start', function(name) {
           if(self.im.config.snappy.default_faq) {
             return self.states.create('states_topics', {
-                faq_id: self.im.config.snappy.default_faq
+                faq_id: self.im.config.snappy.default_faq,
+                faq_label: self.im.config.snappy.default_label,
             });
           } else {
             return self.states.create('states_faqs');
@@ -38,15 +118,18 @@ go.app = function() {
                     }
                 })
                 .then(function (choices) {
-                    return new PaginatedChoiceState(name, {
-                        question: $('Welcome to FAQ Browser. Choose FAQ:'),
+                    return new MessengerChoiceState(name, {
+                        title: $('Welcome to the FAQ Browser!'),
+                        question: $('Please choose a category:'),
+                        image_url: 'https://www.evernote.com/l/ATmWQI24r-RLoYnAL1eOgbMUFWyFqcPJVpsB/image.jpg',
                         choices: choices,
                         options_per_page: 8,
                         next: function (choice) {
                             return {
                                 name: 'states_topics',
                                 creator_opts: {
-                                    faq_id: choice.value
+                                    faq_id: choice.value,
+                                    faq_label: choice.label,
                                 }
                             };
                         }
@@ -70,8 +153,9 @@ go.app = function() {
                     }
                 })
                 .then(function(choices) {
-                    return new PaginatedChoiceState(name, {
-                        question: $('Welcome to FAQ Browser. Choose topic:'),
+                    return new MessengerChoiceState(name, {
+                        title: $('Welcome to the FAQ Browser!'),
+                        question: $('Please choose a ' + opts.faq_label + ' topic:'),
                         choices: choices,
                         options_per_page: 8,
                         next: function(choice) {
@@ -102,7 +186,8 @@ go.app = function() {
                                 return new Choice(d.id, d.question);
                             });
 
-                        return new PaginatedChoiceState(name, {
+                        return new MessengerChoiceState(name, {
+                            title: $('Welcome to the FAQ Browser!'),
                             question: $('Please choose a question:'),
                             choices: choices,
                             options_per_page: null,
@@ -124,7 +209,8 @@ go.app = function() {
 
         // Show answer to selected question
         self.states.add('states_answers', function(name, opts) {
-            return new PaginatedState(name, {
+            return new MessengerPaginatedState(name, {
+                title: $('Welcome to the FAQ Browser!'),
                 text: opts.answer,
                 characters_per_page: 320,
                 more: $('More'),

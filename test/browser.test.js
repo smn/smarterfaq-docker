@@ -27,9 +27,6 @@ describe("app", function() {
                     metric_store: 'test_metric_store',
                     testing: 'true',
                     testing_today: 'April 4, 2014 07:07:07',
-                    endpoints: {
-                        "sms": {"delivery_class": "sms"}
-                    },
                     snappy: {
                         "endpoint": "https://app.besnappy.com/api/v1/",
                         "username": "980d2423-292b-4c34-be81-c74784b9e99a",
@@ -73,24 +70,9 @@ describe("app", function() {
                             '2. French'
                         ].join('\n')
                     })
-                    .check(function(api) {
-                        var smses = _.where(api.outbound.store, {
-                            endpoint: 'sms'
-                        });
-                        assert.equal(smses.length, 0, 'It should not send the SMS!');
-                    })
                     .run();
             });
 
-            it('should *not* fire another sms send metric', function () {
-                return tester
-                    .setup.user.state('states_end')
-                    .check(function(api) {
-                        var metrics = api.metrics.stores.test_metric_store;
-                        assert.equal(metrics['test.faq_sent_via_sms'], undefined);
-                    })
-                    .run();
-            });
         });
     });
 
@@ -108,9 +90,6 @@ describe("app", function() {
                     metric_store: 'test_metric_store',
                     testing: 'true',
                     testing_today: 'April 4, 2014 07:07:07',
-                    endpoints: {
-                        "sms": {"delivery_class": "sms"}
-                    },
                     snappy: {
                         "endpoint": "https://app.besnappy.com/api/v1/",
                         "username": "980d2423-292b-4c34-be81-c74784b9e99a",

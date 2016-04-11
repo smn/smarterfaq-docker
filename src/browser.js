@@ -10,25 +10,24 @@ go.app = function() {
     var PaginatedChoiceState = vumigo.states.PaginatedChoiceState;
 
     var MessengerChoiceState = PaginatedChoiceState.extend(function(self, name, opts) {
+
         opts = _.defaults(opts || {}, {
             helper_metadata: function () {
+                if (opts.choices.length > 3) {
+                    return {};
+                }
 
                 var i18n = self.im.user.i18n;
-                if (opts.choices.length > 3) {
-                    subtitle = self.display();
-                    buttons = [];
-                } else {
-                    subtitle = i18n(opts.question);
-                    buttons = opts.choices.map(function(choice, index) {
-                        return {
-                            title: i18n(choice.label),
-                            payload: {
-                                content: (index + 1) + '',
-                                in_reply_to: self.im.msg.message_id || null,
-                            }
-                        };
-                    });
-                }
+                subtitle = i18n(opts.question);
+                buttons = opts.choices.map(function(choice, index) {
+                    return {
+                        title: i18n(choice.label),
+                        payload: {
+                            content: (index + 1) + '',
+                            in_reply_to: self.im.msg.message_id || null,
+                        }
+                    };
+                });
 
                 return {
                     messenger: {

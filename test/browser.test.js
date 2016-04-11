@@ -3,6 +3,7 @@ var fixtures = require('./fixtures');
 var AppTester = vumigo.AppTester;
 var assert = require('assert');
 var _ = require('lodash');
+var Q = require('q');
 
 describe("app", function() {
 
@@ -11,21 +12,83 @@ describe("app", function() {
 
     beforeEach(function() {
         app = new go.app.GoFAQBrowser();
-
         tester = new AppTester(app);
+        go.utils.get_robby_results = function (im, opts) {
+            fixture = {
+                categories: [{
+                    bucket: 'categories',
+                    classification: 'class1',
+                    score: 15,
+                    metadata: {
+                        description: 'This is Class 1',
+                    }
+                }, {
+                    bucket: 'categories',
+                    classification: 'class2',
+                    score: 10,
+                    metadata: {
+                        description: 'This is Class 2',
+                    }
+                }, {
+                    bucket: 'categories',
+                    classification: 'class3',
+                    score: 5,
+                    metadata: {
+                        description: 'This is Class 3',
+                    }
+                }, {
+                    bucket: 'categories',
+                    classification: 'class4',
+                    score: 0,
+                    metadata: {
+                        description: 'This is Class 4',
+                    }
+                }],
+
+                class1_topics: [{
+                    bucket: 'class1_topics',
+                    classification: 'class1-topics-1',
+                    score: 15,
+                    metadata: {
+                        description: 'Topic for Knights who say Ni are 1',
+                        content: 'Topic for Knights who say Ni are 1',
+                    }
+                }, {
+                    bucket: 'class1_topics',
+                    classification: 'class1-topics-2',
+                    score: 10,
+                    metadata: {
+                        description: 'Topic for Knights who say Ni are 2',
+                        content: 'Topic for Knights who say Ni are 2',
+                    }
+                }, {
+                    bucket: 'class1_topics',
+                    classification: 'class1-topics-3',
+                    score: 5,
+                    metadata: {
+                        description: 'Topic for Knights who say Ni are 3',
+                        content: 'Topic for Knights who say Ni are 3',
+                    }
+                }, {
+                    bucket: 'class1_topics',
+                    classification: 'class1-topics-4',
+                    score: 0,
+                    metadata: {
+                        description: 'Topic for Knights who say Ni are 4',
+                        content: 'Topic for Knights who say Ni are 4',
+                    }
+                }]
+            }
+            return Q(fixture[opts.bucket])
+        }
     });
 
-    // This first section tests functinoality when multiple FAQs can be browsed.
-    // This is not used in some projects (like MomConnnect)
-    describe("for browsing FAQ", function () {
+    describe("Smarter FAQ Browser", function () {
         beforeEach(function () {
             tester
                 .setup.char_limit(800)
                 .setup.config.app({
                     name: 'snappy_browser_test',
-                    env: 'test',
-                    metric_store: 'test_metric_store',
-                    testing: 'true',
                     testing_today: 'April 4, 2014 07:07:07',
                     snappy: {
                         "endpoint": "https://app.besnappy.com/api/v1/",
@@ -36,315 +99,106 @@ describe("app", function() {
                 })
                 .setup(function(api) {
                     fixtures().forEach(api.http.fixtures.add);
-                })
-                .setup(function(api) {
-                    api.metrics.stores = {'test_metric_store': {}};
                 });
         });
 
         describe('When the user starts a session', function () {
-            it('should list all available FAQs', function () {
+            it('it should ask them for the question they want to ask', function () {
                 return tester
                     .start()
                     .check.interaction({
-                        state: 'states_faqs',
-                        reply: [
-                            'Please choose a category:',
-                            '1. English',
-                            '2. French'
-                        ].join('\n')
+                        state: 'states_start',
+                        reply: /Welcome to MomConnect/i
                     })
                     .run();
             });
-        });
 
-        describe('When the user returns after completing a session', function () {
-            it('should *not* send them the previous SMS again', function () {
+            it('should come with suggestions for categories', function () {
                 return tester
-                    .setup.user.state('states_end')
+                    .setup.user.state('states_start')
+                    .input('Who are the Knights who say Ni?')
                     .check.interaction({
-                        state: 'states_faqs',
+                        state: 'states_analyse',
                         reply: [
-                            'Please choose a category:',
-                            '1. English',
-                            '2. French'
+                            'These categories may be relevant to your question:',
+                            '1. This is Class 1',
+                            '2. This is Class 2',
+                            '3. This is Class 3',
+                            '4. This is Class 4',
+                            '5. No, looking for something else.',
                         ].join('\n')
                     })
-                    .run();
-            });
-
-        });
-    });
-
-    // This section tests functionality from the point of selecting topics
-    // Move the 'When the user returns...' test above into this section when selecting
-    //     FAQ is not used.
-    describe("for browsing FAQ topics", function() {
-
-        beforeEach(function() {
-            tester
-                .setup.char_limit(160)
-                .setup.config.app({
-                    name: 'snappy_browser_test',
-                    env: 'test',
-                    metric_store: 'test_metric_store',
-                    testing: 'true',
-                    testing_today: 'April 4, 2014 07:07:07',
-                    snappy: {
-                        "endpoint": "https://app.besnappy.com/api/v1/",
-                        "username": "980d2423-292b-4c34-be81-c74784b9e99a",
-                        "account_id": "1",
-                        "default_faq": "1",
-                        "default_label": "Useless",
-                    }
-                })
-                .setup(function(api) {
-                    api.metrics.stores = {'test_metric_store': {}};
-                })
-                .setup(function(api) {
-                    fixtures().forEach(api.http.fixtures.add);
-                });
-        });
-
-        describe("T1. When the user starts a session", function() {
-            it("should welcome and ask to choose topic", function() {
-                return tester
-                    .start()
-                    .check.interaction({
-                        state: 'states_topics',
-                        reply: [
-                            'Please choose a Useless topic:',
-                            '1. Coffee',
-                            '2. Subscriptions',
-                            '3. Refund',
-                            '4. PowerBar',
-                            '5. Payment',
-                            '6. delivery'
-                        ].join('\n')
-                    })
-                    .run();
+                    .run()
             });
         });
 
-        describe("T2.a When the user chooses topic 52 (1. Coffee)", function() {
-            it("should list first page of questions in topic 52", function() {
+        describe('When a suitable category is found', function () {
+            it('should come with suggestions for topics for that category', function () {
                 return tester
-                    .setup.user.state('states_topics', {
-                        creator_opts: {
-                            faq_id: 1
-                        }
+                    .setup.user.state('states_analyse')
+                    .setup.user.answers({
+                        states_analyse: 'Who are the Knights who say Ni?'
                     })
                     .input('1')
                     .check.interaction({
-                        state: 'states_questions',
+                        state: 'states_topics',
                         reply: [
-                            'Please choose a question:',
-                            '1. What happens if I fall in love with one particular coffee?',
-                            '2. Can I order more than one box at a time?',
-                            '3. More'
+                            'These topics may be relevant to your question:',
+                            '1. Topic for Knights who say Ni are 1',
+                            '2. Topic for Knights who say Ni are 2',
+                            '3. Topic for Knights who say Ni are 3',
+                            '4. Topic for Knights who say Ni are 4',
+                            '5. No, looking for something else.',
                         ].join('\n')
                     })
-                    .run();
+                    .run()
             });
-        });
 
-        describe("T2.b When the user chooses topic 52 and then 3. More", function() {
-            it("should list second page of questions in topic 52", function() {
+            it('should return the relevant content when selecting a topic', function () {
                 return tester
                     .setup.user.state('states_topics', {
                         creator_opts: {
-                            faq_id: 1
+                            classification: 'class1',
+                            bucket: 'class1_topics',
+                            metadata: {
+                                content: 'This is the content',
+                            }
                         }
                     })
-                    .inputs('1', '3')
+                    .setup.user.answers({
+                        states_analyse: 'Who are the Knights who say Ni?'
+                    })
+                    .input('1')
                     .check.interaction({
-                        state: 'states_questions',
+                        state: 'states_content',
                         reply: [
-                            'Please choose a question:',
-                            '1. What happens if the FAQ answer is really long?',
-                            '2. More',
-                            '3. Back'
+                            'Topic for Knights who say Ni are 1',
+                            '1. Exit',
                         ].join('\n')
                     })
-                    .run();
+                    .run()
             });
         });
 
-        describe("T2.c When the user chooses topic 52 and then 3. More, then 2. More", function() {
-            it("should list third page of questions in topic 52", function() {
+        describe('When the content is found', function () {
+            it.skip('should return it to the user in a paginated state', function () {
                 return tester
-                    .setup.user.state('states_topics', {
-                        creator_opts: {
-                            faq_id: 1
-                        }
+                    .setup.user.state('states_content')
+                    .setup.user.answers({
+                        states_analyse: 'Who are the Knights who say Ni?'
                     })
-                    .inputs('1', '3', '2')
+                    .input('1')
                     .check.interaction({
-                        state: 'states_questions',
+                        state: 'states_delivery',
                         reply: [
-                            'Please choose a question:',
-                            '1. What happens if I realise the amount of coffee I\'ve ordered doesn\'t suit?',
-                            '2. Back'
+                            'The Knights who say "Ni", also called the Knights of Ni, are a band of knights encountered by King Arthur and his',
+                            ' followers in the film Monty Python and the Holy Grail. They demonstrate their power by shouting "Ni!" (pronounced',
+                            ' "nee"), terrifying the party, whom they refuse to allow passage through their forest unless appeased through the',
+                            ' gift of a shrubbery.',
                         ].join('\n')
                     })
                     .run();
-            });
-        });
-
-        describe("T3.a When the user chooses question 635", function() {
-            it("should show answer to question 635", function() {
-                return tester
-                    .setup.char_limit(800)
-                    .setup.user.state('states_questions', {
-                        creator_opts: {
-                            faq_id: 1
-                        }
-                    })
-                    .setup.user.answers({'states_topics': '52'})
-                    .input('2')
-                    .check.interaction({
-                        state: 'states_answers',
-                        reply: [
-                            "If the default box of 2 x 250g is not enough for your needs, you can increase the quantity up to 7 bags (or consider the Bulk subscription, starting at 2kgs).",
-                            "1. Exit",
-                        ].join('\n')
-                    })
-                    .run();
-            });
-        });
-
-        describe("T3.c When the user times out and dials back in", function() {
-            it("should not fire a metric increment", function() {
-                return tester
-                    .setup.user.state('states_questions', {
-                        creator_opts: {
-                            faq_id: 1
-                        }
-                    })
-                    .setup.user.answers({'states_topics': '52'})
-                    .input.session_event('new')
-                    .check.interaction({
-                        state: 'states_questions',
-                        reply: [
-                            'Please choose a question:',
-                            '1. What happens if I fall in love with one particular coffee?',
-                            '2. Can I order more than one box at a time?',
-                            '3. More'
-                        ].join('\n')
-                    })
-                    .run();
-            });
-        });
-
-        // test long faq answer splitting
-        describe("T4.a When the user chooses question 999", function() {
-            it("should show the first part of the answer of 999", function() {
-                return tester
-                    .setup.char_limit(1600)
-                    .setup.user.state('states_questions', {
-                        creator_opts: {
-                            faq_id: 1
-                        }
-                    })
-                    .setup.user.answers({'states_topics': '52'})
-                    .inputs('3', '1')
-                    .check.interaction({
-                        state: 'states_answers',
-                        reply: [
-                            "It will be split into multiple pages on a bookletstate, showing content on different screens as the text gets too long. To illustrate this, this super long response has been faked. This should be split over at least 2 screens just because we want to test properly. Let's see.",
-                            '1. Exit'
-                        ].join('\n')
-                    })
-                    .run();
-            });
-        });
-
-        describe("T4.b When the user chooses question 999 and then 1. More", function() {
-            it.skip("should show the second part of the answer to 999", function() {
-                return tester
-                    .setup.user.state('states_questions', {
-                        creator_opts: {
-                            faq_id: 1
-                        }
-                    })
-                    .setup.user.answers({'states_topics': '52'})
-                    .inputs('3', '1', '1')
-                    .check.interaction({
-                        state: 'states_answers',
-                        reply: [
-                            'this, this super long response has been faked. This should be split over at least 2 screens just because we want to test properly. Let\'s',
-                            '1. More',
-                            '2. Back',
-                            '3. Exit'
-                        ].join('\n')
-                    })
-                    .run();
-            });
-        });
-
-        describe("T4.c When the user chooses question 999 and then 1. More twice", function() {
-            it.skip("should show the third part of the answer to 999", function() {
-                return tester
-                    .setup.user.state('states_questions', {
-                        creator_opts: {
-                            faq_id: 1
-                        }
-                    })
-                    .setup.user.answers({'states_topics': '52'})
-                    .inputs('3', '1', '1', '1')
-                    .check.interaction({
-                        state: 'states_answers',
-                        reply: ['see.',
-                            '1. Back',
-                            '2. Exit'
-                        ].join('\n')
-                    })
-                    .run();
-            });
-        });
-
-        describe("T5. When the user chooses to exit", function() {
-            it("should thank the user, and exit", function() {
-                return tester
-                    .setup.user.state('states_questions', {
-                        creator_opts: {
-                            faq_id: 1
-                        }
-                    })
-                    .setup.user.answers({'states_topics': '52'})
-                    .inputs('3', '1', '1')
-                    .check.interaction({
-                        state: 'states_end',
-                        reply: ('Thank you and visit again!')
-                    })
-                    .check.reply.ends_session()
-                    .run();
-            });
-
-            it('should use a delegator state for sending the SMS', function () {
-                return tester
-                    .setup.user.state('states_answers', {
-                        creator_opts: {
-                            answer: 'foo'
-                        }
-                    })
-                    .input('1')  // the only option here is 'exit' because there's so little content
-                    .check.interaction({
-                        state: 'states_end',
-                        reply: ('Thank you and visit again!')
-                    })
-                    .check(function(api) {
-                        // NOTE: disabling because SMS outbound isn't working well enough for a demo
-                        // var smses = _.where(api.outbound.store, {
-                        //     endpoint: 'sms'
-                        // });
-                        // var sms = smses[0];
-                        // assert.equal(smses.length, 1);
-                        // assert.equal(sms.content, 'foo');
-                    })
-                    .check.reply.ends_session()
-                    .run();
-            });
-        });
+            })
+        })
     });
 });

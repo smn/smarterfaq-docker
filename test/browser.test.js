@@ -232,10 +232,6 @@ describe("app", function() {
                             '3. More'
                         ].join('\n')
                     })
-                    .check(function(api) {
-                        var metrics = api.metrics.stores.test_metric_store;
-                        assert.equal(metrics['test.faq_view_question'], undefined);
-                    })
                     .run();
             });
         });

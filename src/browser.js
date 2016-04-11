@@ -69,9 +69,9 @@ go.app = function() {
                                 title: i18n(opts.title),
                                 subtitle: i18n(opts.text),
                                 image_url: opts.image_url || '',
-                                buttons: choices.map(function(choice, index) {
+                                buttons: choices.map(function(choice_name, index) {
                                     return {
-                                        title: i18n(choice.label),
+                                        title: i18n(self.choices[choice_name]),
                                         payload: {
                                             content: '' + (index + 1),
                                             in_reply_to: self.im.msg.message_id || null,

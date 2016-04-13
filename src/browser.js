@@ -24,6 +24,13 @@ go.app = function() {
                     return go.utils
                         .get_wit_intent(self.im, self.im.config.wit.token, content)
                         .then(function (results) {
+                            return self.im
+                                .log(results)
+                                .then(function () {
+                                    return results;
+                                });
+                        })
+                        .then(function (results) {
                             var all_outcomes = _.sortBy(results.data[0].outcomes, 'confidence');
                             var outcomes = _.filter(all_outcomes, function (outcome) {
                                 return outcome.confidence > self.im.config.wit.confidence_threshold;

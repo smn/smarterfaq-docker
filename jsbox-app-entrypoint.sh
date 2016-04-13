@@ -5,6 +5,7 @@ AMQP_PORT=${AMQP_PORT:-5672}
 AMQP_VHOST=${AMQP_VHOST:-/}
 AMQP_USER=${AMQP_USER:-guest}
 AMQP_PASSWORD=${AMQP_PASSWORD:-guest}
+WIT_THRESHOLD=${WIT_THRESHOLD:0.8}
 
 cat > ./config.json <<-EOM
 {
@@ -22,7 +23,7 @@ cat > ./config.json <<-EOM
     },
     "wit": {
         "token": "${WIT_TOKEN}",
-        "confidence_threshold": 0.8
+        "confidence_threshold": ${WIT_THRESHOLD}
     }
 }
 EOM

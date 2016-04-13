@@ -44,7 +44,7 @@ go.app = function() {
                             return {
                               name: 'states_nlp_answer',
                               creator_opts: {
-                                wit_metadata: outcomes[0].metadata
+                                wit_metadata: outcomes[0].metadata.substring(0, 319)
                               }
                             };
                         });

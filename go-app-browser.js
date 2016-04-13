@@ -323,7 +323,9 @@ go.app = function() {
                 .then(function(choices) {
                     return new MessengerChoiceState(name, {
                         title: $('Welcome to the FAQ Browser!'),
-                        question: $('Please choose a ' + opts.faq_label + ' topic:'),
+                        question: $(opts.from_wit
+                                    ? 'Sorry, could not find a suitable match. Please choose a topic:'
+                                    : 'Please choose a topic:'),
                         choices: choices,
                         options_per_page: 8,
                         next: function(choice) {

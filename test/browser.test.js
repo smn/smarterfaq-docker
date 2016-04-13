@@ -148,7 +148,7 @@ describe("app", function() {
                     .check.interaction({
                         state: 'states_topics',
                         reply: [
-                            'Please choose a Useless topic:',
+                            'Sorry, could not find a suitable match. Please choose a topic:',
                             '1. Coffee',
                             '2. Subscriptions',
                             '3. Refund',

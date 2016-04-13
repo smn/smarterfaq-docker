@@ -5,22 +5,61 @@ go.app = function() {
     var App = vumigo.App;
     var Choice = vumigo.states.Choice;
     var EndState = vumigo.states.EndState;
+    var FreeText = vumigo.states.FreeText;
     var MessengerPaginatedState = go.states.MessengerPaginatedState;
     var MessengerChoiceState = go.states.MessengerChoiceState;
 
     var GoFAQBrowser = App.extend(function(self) {
-        App.call(self, 'states_start');
+        App.call(self, 'states_nlp');
         var $ = self.$;
 
+        self.states.add('states_nlp', function (name) {
+            return new FreeText(name, {
+                question: $('Hello! What question can I help you with?'),
+                next: function (content) {
+                    return go.utils
+                        .get_wit_intent(self.im, self.im.config.wit.token, content)
+                        .then(function (results) {
+                            var all_outcomes = _.sortBy(results.data[0].outcomes, 'confidence');
+                            var outcomes = _.filter(all_outcomes, function (outcome) {
+                                return outcome.confidence > self.im.config.wit.confidence_threshold;
+                            });
+                            if (_.isEmpty(outcomes)) {
+                                return self.states.create('states_start', {
+                                  from_wit: true
+                                });
+                            }
+
+                            return {
+                              name: 'states_nlp_answer',
+                              creator_opts: {
+                                wit_metadata: outcomes[0].metadata
+                              }
+                            };
+                        });
+                }
+            });
+        });
+
+        self.states.add('states_nlp_answer', function (name, opts) {
+            return new EndState(name, {
+                text: opts.wit_metadata,
+                next :'states_nlp',
+            });
+        });
+
         // Start - select topic
-        self.states.add('states_start', function(name) {
+        self.states.add('states_start', function(name, opts) {
           if(self.im.config.snappy.default_faq) {
             return self.states.create('states_topics', {
                 faq_id: self.im.config.snappy.default_faq,
                 faq_label: self.im.config.snappy.default_label,
+                from_wit: opts.from_wit,
             });
           } else {
-            return self.states.create('states_faqs');
+            return self.states.create('states_faqs', {
+                from_wit: opts.from_wit,
+            });
           }
         });
 

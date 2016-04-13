@@ -128,6 +128,21 @@ go.utils = {
         return (!_.isUndefined(bool) && (bool==='true' || bool===true));
     },
 
+    get_wit_intent: function (im, token, content) {
+        var http = new JsonApi(im, {
+            headers: {
+                'Authorization': ['Bearer ' + token],
+                'Content-Type': ['application/json'],
+            }
+        });
+        return http.get('https://api.wit.ai/message?', {
+            params: {
+                v: '20141022',
+                q: content
+            }
+        });
+    },
+
     get_snappy_faqs: function (im) {
         var http = new JsonApi(im, {
             auth: {

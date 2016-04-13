@@ -1,7 +1,67 @@
 module.exports = function () {
     return [
+        // WIT response
+        {
+            'repeatable': true,
+            'request': {
+                'method': 'GET',
+                'headers': {
+                    'Authorization': ['Bearer token'],
+                    'Content-TYpe': ['application/json']
+                },
+                'url': 'https://api.wit.ai/message',
+                'params': {
+                    'v': '20141022',
+                    'q': 'matching content'
+                }
+            },
+            'response': {
+                'code': '200',
+                'data': [{
+                    "msg_id": "c949549a-9452-4787-bac1-5922eafa6bb3",
+                    "_text": "I am breastfeeding, can I have sex?",
+                    "outcomes": [{
+                        "_text": "I am breastfeeding, can I have sex?",
+                        "confidence": 0.995,
+                        "intent": "baby_can_i_get_pregnant_if_i_have_sex_while_breastfeeding",
+                        "entities": {},
+                        "metadata": "Yes you can get pregnant while breastfeeding. Getting pregnant too soon can be dangerous for you, and your next baby could be born weak and early.\nIt's best to not have sex for at least 6 weeks after birth or until you have healed. When you start having sex, use a family planning method. This will prevent you from getting pregnant too early. There are plenty of options to choose from. Condoms will prevent pregnancy and sexually transmitted infections and diseases."
+                    }]
+                }]
+            }
+        },
+        {
+            'repeatable': true,
+            'request': {
+                'method': 'GET',
+                'headers': {
+                    'Authorization': ['Bearer token'],
+                    'Content-TYpe': ['application/json']
+                },
+                'url': 'https://api.wit.ai/message',
+                'params': {
+                    'v': '20141022',
+                    'q': 'not matching content'
+                }
+            },
+            'response': {
+                'code': '200',
+                'data': [{
+                    "msg_id": "c949549a-9452-4787-bac1-5922eafa6bb3",
+                    "_text": "I am breastfeeding, can I have sex?",
+                    "outcomes": [{
+                        "_text": "I am breastfeeding, can I have sex?",
+                        "confidence": 0.1,
+                        "intent": "baby_can_i_get_pregnant_if_i_have_sex_while_breastfeeding",
+                        "entities": {},
+                        "metadata": "This is a terrible answer"
+                    }]
+                }]
+            }
+        },
         // FAQ RESPONSE
         {
+            'repeatable': true,
             'request': {
                 'method': 'GET',
                 'headers': {
@@ -39,6 +99,7 @@ module.exports = function () {
         },
         // TOPIC RESPONSE
         {
+            'repeatable': true,
             'request': {
                 'method': 'GET',
                 'headers': {

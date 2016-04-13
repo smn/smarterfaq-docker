@@ -185,10 +185,8 @@ go.app = function() {
     var App = vumigo.App;
     var Choice = vumigo.states.Choice;
     var EndState = vumigo.states.EndState;
-    var FreeText = vumigo.states.FreeText;
     var MessengerPaginatedState = go.states.MessengerPaginatedState;
-    // var MessengerChoiceState = go.states.MessengerChoiceState;
-    var PaginatedChoiceState = vumigo.states.PaginatedChoiceState;
+    var MessengerChoiceState = go.states.MessengerChoiceState;
 
     var GoFAQBrowser = App.extend(function(self) {
         App.call(self, 'states_start');
@@ -196,95 +194,125 @@ go.app = function() {
 
         // Start - select topic
         self.states.add('states_start', function(name) {
-            return new FreeText(name, {
-                question: $([
-                    'Hi there and welcome to MomConnect. ',
-                    'Please ask your question and we will try and find the most relevant answer. ',
-                ].join('\n')),
-                next: 'states_analyse'
+          if(self.im.config.snappy.default_faq) {
+            return self.states.create('states_topics', {
+                faq_id: self.im.config.snappy.default_faq,
+                faq_label: self.im.config.snappy.default_label,
             });
+          } else {
+            return self.states.create('states_faqs');
+          }
         });
 
-        self.states.add('states_analyse', function (name) {
-            answers = self.im.user.answers;
-            return go.utils
-                .get_robby_results(self.im, {
-                    bucket: 'categories',
-                    content: answers.states_analyse,
+        self.states.add('states_faqs', function (name, opts) {
+            return go.utils.get_snappy_faqs(self.im)
+                .then(function (response) {
+                    if(typeof response.data.error !== 'undefined') {
+                        return error;
+                    } else {
+                        return _.sortBy(response.data, function (d) {
+                                return parseInt(d.order, 10);
+                            })
+                            .map(function (d) {
+                                return new Choice(d.id, d.title);
+                            });
+                    }
                 })
-                .then(function (results) {
-                    return _.sortBy(results, 'score').reverse();
-                })
-                .then(function (options) {
-
-                    var choices = options.map(function (option) {
-                        return new Choice(option,
-                                          option.metadata.description);
-                    });
-                    choices.push(new Choice("__manual", "No, looking for something else."));
-
-                    return new PaginatedChoiceState(name, {
-                        question: $('These categories may be relevant to your question:'),
+                .then(function (choices) {
+                    return new MessengerChoiceState(name, {
+                        title: $('Welcome to the FAQ Browser!'),
+                        question: $('Please choose a category:'),
+                        image_url: 'https://www.evernote.com/l/ATmWQI24r-RLoYnAL1eOgbMUFWyFqcPJVpsB/image.jpg',
                         choices: choices,
                         options_per_page: 8,
                         next: function (choice) {
-                            if (choice.value === '__manual') {
-                                return {
-                                    name: 'states_train',
-                                    creator_opts: {}
-                                };
-                            } else {
-                                return {
-                                    name: 'states_topics',
-                                    creator_opts: choice.value,
-                                };
-                            }
+                            return {
+                                name: 'states_topics',
+                                creator_opts: {
+                                    faq_id: choice.value,
+                                    faq_label: choice.label,
+                                }
+                            };
                         }
                     });
                 });
         });
 
         self.states.add('states_topics', function (name, opts) {
-            answers = self.im.user.answers;
-            return go.utils.get_robby_results(self.im, {
-                    bucket: opts.classification + '_topics',
-                    content: answers.states_start
+            return go.utils.get_snappy_topics(self.im, opts.faq_id)
+                .then(function(response) {
+                    if (typeof response.data.error  !== 'undefined') {
+                        // TODO Throw proper error
+                        return error;
+                    } else {
+                        return _.sortBy(response.data, function (d) {
+                                return parseInt(d.order, 10);
+                            })
+                            .map(function(d) {
+                                return new Choice(d.id, d.topic);
+                            });
+                    }
                 })
-                .then(function (results) {
-                    return _.sortBy(results, 'score').reverse();
-                })
-                .then(function (options) {
-                    var choices = options.map(function (option) {
-                        return new Choice(option, option.metadata.description);
-                    });
-                    choices.push(new Choice("__manual", "No, looking for something else."));
-
-                    return new PaginatedChoiceState(name, {
-                        question: $('These topics may be relevant to your question:'),
+                .then(function(choices) {
+                    return new MessengerChoiceState(name, {
+                        title: $('Welcome to the FAQ Browser!'),
+                        question: $('Please choose a ' + opts.faq_label + ' topic:'),
                         choices: choices,
                         options_per_page: 8,
-                        next: function (choice) {
-                            if (choice.value === '__manual') {
-                                return {
-                                    name: 'states_train',
-                                    creator_opts: {}
-                                };
-                            } else {
-                                return {
-                                    name: 'states_content',
-                                    creator_opts: choice.value,
-                                };
-                            }
+                        next: function(choice) {
+                            return {
+                                name: 'states_questions',
+                                creator_opts: {
+                                    faq_id: opts.faq_id
+                                }
+                            };
                         }
                     });
                 });
         });
 
+        // Show questions in selected topic
+        self.states.add('states_questions', function(name, opts) {
+            return go.utils.get_snappy_topic_content(self.im,
+                        opts.faq_id, self.im.user.answers.states_topics)
+                .then(function(response) {
+                    if (typeof response.data.error  !== 'undefined') {
+                        // TODO Throw proper error
+                        return error;
+                    } else {
+                        var choices = _.sortBy(response.data, function (d) {
+                                return parseInt(d.pivot.order, 10);
+                            })
+                            .map(function(d) {
+                                return new Choice(d.id, d.question);
+                            });
+
+                        return new MessengerChoiceState(name, {
+                            title: $('Welcome to the FAQ Browser!'),
+                            question: $('Please choose a question:'),
+                            choices: choices,
+                            options_per_page: null,
+                            next: function(choice) {
+                                var question_id = choice.value;
+                                var index = _.findIndex(response.data, { 'id': question_id});
+                                var answer = response.data[index].answer.trim();
+                                return {
+                                    name: 'states_answers',
+                                    creator_opts: {
+                                        answer: answer
+                                    }
+                                };
+                            }
+                        });
+                    }
+                });
+        });
+
         // Show answer to selected question
-        self.states.add('states_content', function(name, opts) {
+        self.states.add('states_answers', function(name, opts) {
             return new MessengerPaginatedState(name, {
                 title: $('Welcome to the FAQ Browser!'),
-                text: opts.metadata.content,
+                text: opts.answer,
                 characters_per_page: 320,
                 more: $('More'),
                 back: $('Back'),

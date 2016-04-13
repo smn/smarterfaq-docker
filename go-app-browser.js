@@ -230,7 +230,7 @@ go.app = function() {
                             var outcomes = _.filter(all_outcomes, function (outcome) {
                                 return outcome.confidence > self.im.config.wit.confidence_threshold;
                             });
-                            if (_.isEmpty(outcomes)) {
+                            if (_.isEmpty(outcomes) || _.isEmpty(outcomes[0].metadata)) {
                                 return self.states.create('states_start', {
                                   from_wit: true
                                 });

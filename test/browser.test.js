@@ -75,8 +75,8 @@ describe("app", function() {
                     .setup.user.state('states_nlp')
                     .input('no matching content')
                     .check.interaction({
-                        state: 'states_topics',
-                        reply: /Sorry, could not find a suitable match. Please choose a topic\:/
+                        state: 'states_faqs',
+                        reply: /Sorry, could not find a suitable match. Please choose a category\:/
                     })
                     .run();
             })

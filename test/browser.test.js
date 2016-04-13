@@ -69,13 +69,24 @@ describe("app", function() {
                     .check.reply.ends_session()
                     .run();
             })
+
+            it('should handle getting default_intent back', function () {
+                return tester
+                    .setup.user.state('states_nlp')
+                    .input('no matching content')
+                    .check.interaction({
+                        state: 'states_topics',
+                        reply: /Sorry, could not find a suitable match. Please choose a topic\:/
+                    })
+                    .run();
+            })
         });
 
         describe('When the user starts a session', function () {
             it('should list all available FAQs', function () {
                 return tester
                     .setup.user.state('states_nlp')
-                    .input('not matching content')
+                    .input('poor matching content')
                     .check.interaction({
                         state: 'states_faqs',
                         reply: [
@@ -144,7 +155,7 @@ describe("app", function() {
             it("should welcome and ask to choose topic", function() {
                 return tester
                     .setup.user.state('states_nlp')
-                    .input('not matching content')
+                    .input('poor matching content')
                     .check.interaction({
                         state: 'states_topics',
                         reply: [

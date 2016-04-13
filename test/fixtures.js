@@ -41,12 +41,12 @@ module.exports = function () {
                 'url': 'https://api.wit.ai/message',
                 'params': {
                     'v': '20141022',
-                    'q': 'not matching content'
+                    'q': 'poor matching content'
                 }
             },
             'response': {
                 'code': '200',
-                'data': [{
+                'data': {
                     "msg_id": "c949549a-9452-4787-bac1-5922eafa6bb3",
                     "_text": "I am breastfeeding, can I have sex?",
                     "outcomes": [{
@@ -56,9 +56,47 @@ module.exports = function () {
                         "entities": {},
                         "metadata": "This is a terrible answer"
                     }]
-                }]
+                }
             }
         },
+        {
+            'repeatable': true,
+            'request': {
+                'method': 'GET',
+                'headers': {
+                    'Authorization': ['Bearer token'],
+                    'Content-TYpe': ['application/json']
+                },
+                'url': 'https://api.wit.ai/message',
+                'params': {
+                    'v': '20141022',
+                    'q': 'no matching content'
+                }
+            },
+            'response': {
+                'code': '200',
+                'data': {
+                    "msg_id" : "bbd55436-5470-464c-8421-7d0135dc2a31",
+                    "_text" : "when do I need to take my baby to the clinic?",
+                    "outcomes" : [ {
+                        "_text" : "when do I need to take my baby to the clinic?",
+                        "confidence" : 0.983,
+                        "intent" : "default_intent",
+                        "entities" : {
+                            "topic" : [ {
+                                "type" : "value",
+                                "value" : "baby"
+                            } ],
+                            "sub_topic" : [ {
+                                "type" : "value",
+                                "value" : "clinic"
+                            } ]
+                        }
+                    }]
+                }
+            }
+        },
+
         // FAQ RESPONSE
         {
             'repeatable': true,

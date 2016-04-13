@@ -14,6 +14,10 @@ go.app = function() {
         var $ = self.$;
 
         self.states.add('states_nlp', function (name) {
+            if (_.isEmpty(self.im.config.wit)) {
+                return self.states.create('states_start');
+            }
+
             return new FreeText(name, {
                 question: $('Hello! What question can I help you with?'),
                 next: function (content) {

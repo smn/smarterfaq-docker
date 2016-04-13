@@ -94,10 +94,12 @@ go.states = {
         PaginatedState.call(self, name, opts);
     }),
 
-    "trailing": "commas"
+    "silly": "trailing commas"
 };
 
 go.utils = {
+
+
     // Shared utils lib
 
     get_today: function(config) {
@@ -127,6 +129,21 @@ go.utils = {
     is_true: function(bool) {
         //If is is not undefined and boolean is true
         return (!_.isUndefined(bool) && (bool==='true' || bool===true));
+    },
+
+    get_wit_intent: function (im, token, content) {
+        var http = new JsonApi(im, {
+            headers: {
+                'Authorization': ['Bearer ' + token],
+                'Content-Type': ['application/json'],
+            }
+        });
+        return http.get('https://api.wit.ai/message?', {
+            params: {
+                v: '20141022',
+                q: content
+            }
+        });
     },
 
     get_snappy_faqs: function (im) {
@@ -183,22 +200,65 @@ go.app = function() {
     var App = vumigo.App;
     var Choice = vumigo.states.Choice;
     var EndState = vumigo.states.EndState;
-    var MessengerChoiceState = go.states.MessengerChoiceState;
+    var FreeText = vumigo.states.FreeText;
     var MessengerPaginatedState = go.states.MessengerPaginatedState;
+    var MessengerChoiceState = go.states.MessengerChoiceState;
 
     var GoFAQBrowser = App.extend(function(self) {
-        App.call(self, 'states_start');
+        App.call(self, 'states_nlp');
         var $ = self.$;
 
+        self.states.add('states_nlp', function (name) {
+            if (_.isEmpty(self.im.config.wit)) {
+                return self.states.create('states_start');
+            }
+
+            return new FreeText(name, {
+                question: $('Hello! What question can I help you with?'),
+                next: function (content) {
+                    return go.utils
+                        .get_wit_intent(self.im, self.im.config.wit.token, content)
+                        .then(function (results) {
+                            var all_outcomes = _.sortBy(results.data[0].outcomes, 'confidence');
+                            var outcomes = _.filter(all_outcomes, function (outcome) {
+                                return outcome.confidence > self.im.config.wit.confidence_threshold;
+                            });
+                            if (_.isEmpty(outcomes)) {
+                                return self.states.create('states_start', {
+                                  from_wit: true
+                                });
+                            }
+
+                            return {
+                              name: 'states_nlp_answer',
+                              creator_opts: {
+                                wit_metadata: outcomes[0].metadata
+                              }
+                            };
+                        });
+                }
+            });
+        });
+
+        self.states.add('states_nlp_answer', function (name, opts) {
+            return new EndState(name, {
+                text: opts.wit_metadata,
+                next :'states_nlp',
+            });
+        });
+
         // Start - select topic
-        self.states.add('states_start', function(name) {
+        self.states.add('states_start', function(name, opts) {
           if(self.im.config.snappy.default_faq) {
             return self.states.create('states_topics', {
                 faq_id: self.im.config.snappy.default_faq,
                 faq_label: self.im.config.snappy.default_label,
+                from_wit: opts.from_wit,
             });
           } else {
-            return self.states.create('states_faqs');
+            return self.states.create('states_faqs', {
+                from_wit: opts.from_wit,
+            });
           }
         });
 
@@ -219,7 +279,9 @@ go.app = function() {
                 .then(function (choices) {
                     return new MessengerChoiceState(name, {
                         title: $('Welcome to the FAQ Browser!'),
-                        question: $('Please choose a category:'),
+                        question: $(opts.from_wit
+                                    ? 'Sorry, could not find a suitable match. Please choose a category:'
+                                    : 'Please choose a category:'),
                         image_url: 'https://www.evernote.com/l/ATmWQI24r-RLoYnAL1eOgbMUFWyFqcPJVpsB/image.jpg',
                         choices: choices,
                         options_per_page: 8,

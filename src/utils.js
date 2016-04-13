@@ -91,10 +91,12 @@ go.states = {
         PaginatedState.call(self, name, opts);
     }),
 
-    "trailing": "commas"
+    "silly": "trailing commas"
 };
 
 go.utils = {
+
+
     // Shared utils lib
 
     get_today: function(config) {
@@ -124,6 +126,21 @@ go.utils = {
     is_true: function(bool) {
         //If is is not undefined and boolean is true
         return (!_.isUndefined(bool) && (bool==='true' || bool===true));
+    },
+
+    get_wit_intent: function (im, token, content) {
+        var http = new JsonApi(im, {
+            headers: {
+                'Authorization': ['Bearer ' + token],
+                'Content-Type': ['application/json'],
+            }
+        });
+        return http.get('https://api.wit.ai/message?', {
+            params: {
+                v: '20141022',
+                q: content
+            }
+        });
     },
 
     get_snappy_faqs: function (im) {

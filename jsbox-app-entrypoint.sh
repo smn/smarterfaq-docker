@@ -19,6 +19,10 @@ cat > ./config.json <<-EOM
         "sms": {
             "delivery_class": "sms"
         }
+    },
+    "wit": {
+        "token": "${WIT_TOKEN}",
+        "confidence_threshold": 0.8
     }
 }
 EOM

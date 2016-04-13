@@ -32,6 +32,10 @@ describe("app", function() {
                         "username": "980d2423-292b-4c34-be81-c74784b9e99a",
                         "account_id": "1"
                         // NOTE: default_faq is not set
+                    },
+                    wit: {
+                        token: 'the token',
+                        confidence_threshold: 0.8
                     }
                 })
                 .setup(function(api) {
@@ -42,14 +46,40 @@ describe("app", function() {
                 });
         });
 
-        describe('When the user starts a session', function () {
-            it('should list all available FAQs', function () {
+
+        describe('using Wit', function () {
+            it('ask for the question', function () {
                 return tester
                     .start()
                     .check.interaction({
+                        state: 'states_nlp',
+                        reply: /What question can I help you with\?/
+                    })
+                    .run();
+            });
+
+            it('should return the results immediately if a match is found', function () {
+                return tester
+                    .setup.user.state('states_nlp')
+                    .input('matching content')
+                    .check.interaction({
+                        state: 'states_nlp_answer',
+                        reply: /Yes you can get pregnant while breastfeeding/
+                    })
+                    .check.reply.ends_session()
+                    .run();
+            })
+        });
+
+        describe('When the user starts a session', function () {
+            it('should list all available FAQs', function () {
+                return tester
+                    .setup.user.state('states_nlp')
+                    .input('not matching content')
+                    .check.interaction({
                         state: 'states_faqs',
                         reply: [
-                            'Please choose a category:',
+                            'Sorry, could not find a suitable match. Please choose a category:',
                             '1. English',
                             '2. French'
                         ].join('\n')
@@ -96,6 +126,10 @@ describe("app", function() {
                         "account_id": "1",
                         "default_faq": "1",
                         "default_label": "Useless",
+                    },
+                    wit: {
+                        token: 'token',
+                        confidence_threshold: 0.8
                     }
                 })
                 .setup(function(api) {
@@ -109,7 +143,8 @@ describe("app", function() {
         describe("T1. When the user starts a session", function() {
             it("should welcome and ask to choose topic", function() {
                 return tester
-                    .start()
+                    .setup.user.state('states_nlp')
+                    .input('not matching content')
                     .check.interaction({
                         state: 'states_topics',
                         reply: [

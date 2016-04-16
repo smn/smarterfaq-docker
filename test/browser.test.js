@@ -273,7 +273,7 @@ describe("app", function() {
                         state: 'states_answers',
                         reply: [
                             "If the default box of 2 x 250g is not enough for your needs, you can increase the quantity up to 7 bags (or consider the Bulk subscription, starting at 2kgs).",
-                            "1. Exit",
+                            "1. I\'ve read enough",
                         ].join('\n')
                     })
                     .run();
@@ -319,7 +319,7 @@ describe("app", function() {
                         state: 'states_answers',
                         reply: [
                             "It will be split into multiple pages on a bookletstate, showing content on different screens as the text gets too long. To illustrate this, this super long response has been faked. This should be split over at least 2 screens just because we want to test properly. Let's see.",
-                            '1. Exit'
+                            '1. I\'ve read enough'
                         ].join('\n')
                     })
                     .run();
@@ -342,7 +342,7 @@ describe("app", function() {
                             'this, this super long response has been faked. This should be split over at least 2 screens just because we want to test properly. Let\'s',
                             '1. More',
                             '2. Back',
-                            '3. Exit'
+                            '3. I\'ve read enough'
                         ].join('\n')
                     })
                     .run();
@@ -363,7 +363,7 @@ describe("app", function() {
                         state: 'states_answers',
                         reply: ['see.',
                             '1. Back',
-                            '2. Exit'
+                            '2. I\'ve read enough'
                         ].join('\n')
                     })
                     .run();

@@ -239,7 +239,7 @@ go.app = function() {
                 characters_per_page: 320,
                 more: $('More'),
                 back: $('Back'),
-                exit: $('Exit'),
+                exit: $('I\'ve read enough'),
                 next: function() {
                     return {
                         name: 'states_end',

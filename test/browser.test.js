@@ -20,7 +20,7 @@ describe("app", function() {
     describe("for browsing FAQ", function () {
         beforeEach(function () {
             tester
-                .setup.char_limit(800)
+                .setup.char_limit(320)
                 .setup.config.app({
                     name: 'snappy_browser_test',
                     env: 'test',
@@ -195,7 +195,7 @@ describe("app", function() {
         beforeEach(function() {
 
             tester
-                .setup.char_limit(160)
+                .setup.char_limit(320)
                 .setup.config.app({
                     name: 'snappy_browser_test',
                     env: 'test',
@@ -258,50 +258,8 @@ describe("app", function() {
                             'Please choose a question:',
                             '1. What happens if I fall in love with one particular coffee?',
                             '2. Can I order more than one box at a time?',
-                            '3. More'
-                        ].join('\n')
-                    })
-                    .run();
-            });
-        });
-
-        describe("T2.b When the user chooses topic 52 and then 3. More", function() {
-            it("should list second page of questions in topic 52", function() {
-                return tester
-                    .setup.user.state('states_topics', {
-                        creator_opts: {
-                            faq_id: 1
-                        }
-                    })
-                    .inputs('1', '3')
-                    .check.interaction({
-                        state: 'states_questions',
-                        reply: [
-                            'Please choose a question:',
-                            '1. What happens if the FAQ answer is really long?',
-                            '2. More',
-                            '3. Back'
-                        ].join('\n')
-                    })
-                    .run();
-            });
-        });
-
-        describe("T2.c When the user chooses topic 52 and then 3. More, then 2. More", function() {
-            it("should list third page of questions in topic 52", function() {
-                return tester
-                    .setup.user.state('states_topics', {
-                        creator_opts: {
-                            faq_id: 1
-                        }
-                    })
-                    .inputs('1', '3', '2')
-                    .check.interaction({
-                        state: 'states_questions',
-                        reply: [
-                            'Please choose a question:',
-                            '1. What happens if I realise the amount of coffee I\'ve ordered doesn\'t suit?',
-                            '2. Back'
+                            '3. What happens if the FAQ answer is really long?',
+                            '4. What happens if I realise the amount of coffee I\'ve ordered doesn\'t suit?'
                         ].join('\n')
                     })
                     .run();
@@ -330,45 +288,22 @@ describe("app", function() {
             });
         });
 
-        describe("T3.c When the user times out and dials back in", function() {
-            it("should not fire a metric increment", function() {
-                return tester
-                    .setup.user.state('states_questions', {
-                        creator_opts: {
-                            faq_id: 1
-                        }
-                    })
-                    .setup.user.answers({'states_topics': '52'})
-                    .input.session_event('new')
-                    .check.interaction({
-                        state: 'states_questions',
-                        reply: [
-                            'Please choose a question:',
-                            '1. What happens if I fall in love with one particular coffee?',
-                            '2. Can I order more than one box at a time?',
-                            '3. More'
-                        ].join('\n')
-                    })
-                    .run();
-            });
-        });
-
         // test long faq answer splitting
         describe("T4.a When the user chooses question 999", function() {
             it("should show the first part of the answer of 999", function() {
                 return tester
-                    .setup.char_limit(1600)
+                    .setup.char_limit(320)
                     .setup.user.state('states_questions', {
                         creator_opts: {
                             faq_id: 1
                         }
                     })
                     .setup.user.answers({'states_topics': '52'})
-                    .inputs('3', '1')
+                    .inputs('1')
                     .check.interaction({
                         state: 'states_answers',
                         reply: [
-                            "It will be split into multiple pages on a bookletstate, showing content on different screens as the text gets too long. To illustrate this, this super long response has been faked. This should be split over at least 2 screens just because we want to test properly. Let's see.",
+                            "At this point, we are offering the mixed box of different local coffee brands, but plan to offer a customised service for you in the near future where you will be able to choose exactly which brand you would like to receive. Watch this space!",
                             '1. I\'ve read enough'
                         ].join('\n')
                     })
@@ -429,7 +364,7 @@ describe("app", function() {
                         }
                     })
                     .setup.user.answers({'states_topics': '52'})
-                    .inputs('3', '1', '1')
+                    .inputs('3', '1')
                     .check.interaction({
                         state: 'states_end',
                         reply: ('Thank you and visit again!')

@@ -335,6 +335,7 @@ go.app = function() {
     var FreeText = vumigo.states.FreeText;
     var MessengerPaginatedState = go.states.MessengerPaginatedState;
     var MessengerChoiceState = go.states.MessengerChoiceState;
+    var ChoiceState = vumigo.states.ChoiceState;
 
     var GoFAQBrowser = App.extend(function(self) {
         App.call(self, 'states_nlp');
@@ -435,8 +436,9 @@ go.app = function() {
             answer = opts.match.answer;
             if(answer.length > 320) {
                 return new MessengerPaginatedState(name, {
+                    title: $(opts.match.question),
                     text: $(opts.match.answer),
-                    characters_per_page: 320,
+                    characters_per_page: 300,
                     next: function (choice) {
                         return {
                             name: 'states_end',
@@ -543,7 +545,7 @@ go.app = function() {
 
         self.states.add('question_1_friendliness', function(name) {
             return new MessengerChoiceState(name, {
-                title: 'MomConnect',
+                title: 'Service Rating',
                 image_url: 'https://www.evernote.com/l/ATmWQI24r-RLoYnAL1eOgbMUFWyFqcPJVpsB/image.jpg',
                 question: $('Welcome{{user_name}}. When you signed up, were staff at the facility friendly & helpful?').context({
                     'user_name': (_.isUndefined(self.user_profile.first_name)
@@ -564,7 +566,7 @@ go.app = function() {
 
         self.states.add('question_2_waiting_times_feel', function(name) {
             return new MessengerChoiceState(name, {
-                title: 'MomConnect',
+                title: 'Service Rating',
                 question: $('How do you feel about the time you had to wait at the facility?'),
 
                 choices: [
@@ -580,7 +582,7 @@ go.app = function() {
 
         self.states.add('question_3_waiting_times_length', function(name) {
             return new MessengerChoiceState(name, {
-                title: 'MomConnect',
+                title: 'Service Rating',
                 question: $('How long did you wait to be helped at the clinic?'),
 
                 choices: [
@@ -596,7 +598,7 @@ go.app = function() {
 
         self.states.add('question_4_cleanliness', function(name) {
             return new MessengerChoiceState(name, {
-                title: 'MomConnect',
+                title: 'Service Rating',
                 question: $('Was the facility clean?'),
 
                 choices: [
@@ -612,7 +614,7 @@ go.app = function() {
 
         self.states.add('question_5_privacy', function(name) {
             return new MessengerChoiceState(name, {
-                title: 'MomConnect',
+                title: 'Service Rating',
                 question: $('Did you feel that your privacy was respected by the staff?'),
 
                 choices: [
@@ -660,13 +662,12 @@ go.app = function() {
                     }
                 })
                 .then(function (choices) {
-                    return new MessengerChoiceState(name, {
-                        title: $('Welcome to the FAQ Browser!'),
+                    return new ChoiceState(name, {
                         question: $(opts.from_wit
                                     ? 'Sorry, could not find a suitable match. Please choose a category:'
                                     : 'Please choose a category:'),
-                        image_url: 'https://www.evernote.com/l/ATmWQI24r-RLoYnAL1eOgbMUFWyFqcPJVpsB/image.jpg',
                         choices: choices,
+                        characters_per_page: 320,
                         options_per_page: 8,
                         next: function (choice) {
                             return {
@@ -698,12 +699,12 @@ go.app = function() {
                     }
                 })
                 .then(function(choices) {
-                    return new MessengerChoiceState(name, {
-                        title: $('Welcome to the FAQ Browser!'),
+                    return new ChoiceState(name, {
                         question: $(opts.from_wit
                                     ? 'Sorry, could not find a suitable match. Please choose a topic:'
                                     : 'Please choose a topic:'),
                         choices: choices,
+                        characters_per_page: 320,
                         options_per_page: 8,
                         next: function(choice) {
                             return {
@@ -736,10 +737,10 @@ go.app = function() {
                                 return new Choice(d.id, d.question);
                             });
 
-                        return new MessengerChoiceState(name, {
-                            title: $('Welcome to the FAQ Browser!'),
+                        return new ChoiceState(name, {
                             question: $('Please choose a question:'),
                             choices: choices,
+                            characters_per_page: 320,
                             options_per_page: null,
                             next: function(choice) {
                                 var question_id = choice.value;

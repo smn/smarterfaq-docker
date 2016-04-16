@@ -61,14 +61,44 @@ describe("app", function() {
                     .run();
             });
 
-            it('should return the results immediately if a match is found', function () {
+            it('should return the matches immediately if a match is found', function () {
                 return tester
                     .setup.user.state('states_nlp')
                     .input('matching content')
+                    .check.reply(function (properties) {
+                        md = properties.helper_metadata;
+                        assert.equal(md.messenger.template_type, 'generic');
+                        element = md.messenger.elements[0];
+                        assert.equal(element.title, 'Latching...');
+                        assert.equal(element.subtitle, 'Your baby needs a good mouthful of your breast to feed well. Check that he h...')
+                        button = element.buttons[0]
+                        assert.equal(button.title, 'This looks correct');
+                        assert.equal(button.payload.content, '1');
+                    })
                     .check.interaction({
                         state: 'states_search',
                         reply: /Your baby needs a good mouthful/
                     })
+                    .run();
+            });
+
+            it('should return the answer when confirmed correct', function () {
+                return tester
+                    .setup.user.state('states_search', {
+                        creator_opts: {
+                            entities: {
+                                search_category: 'baby',
+                                search_topic: 'breastfeeding',
+                            },
+                            question: 'matching content'
+                        }
+                    })
+                    .input('1')
+                    .check.interaction({
+                        state: 'states_nlp_answer',
+                        reply: /Your baby needs a good mouthful/
+                    })
+                    .check.reply.ends_session()
                     .run();
             });
 

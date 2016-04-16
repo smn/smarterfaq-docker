@@ -153,16 +153,21 @@ go.utils = {
                         search_category: entities.search_category[0].value,
                         search_topic: entities.search_topic[0].value,
                     },
-                    content: content
+                    question: content
                 }
             };
         }
         return {
             name: 'states_fallback',
             creator_opts: {
-                from_wit: true
+                from_wit: true,
+                question: content,
             }
         };
+    },
+
+    train_wit: function () {
+        return Q();
     },
 
     search_topics: function (im, es, opts) {

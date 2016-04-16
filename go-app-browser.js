@@ -156,16 +156,21 @@ go.utils = {
                         search_category: entities.search_category[0].value,
                         search_topic: entities.search_topic[0].value,
                     },
-                    content: content
+                    question: content
                 }
             };
         }
         return {
             name: 'states_fallback',
             creator_opts: {
-                from_wit: true
+                from_wit: true,
+                question: content,
             }
         };
+    },
+
+    train_wit: function () {
+        return Q();
     },
 
     search_topics: function (im, es, opts) {
@@ -286,7 +291,6 @@ go.app = function() {
     var Choice = vumigo.states.Choice;
     var EndState = vumigo.states.EndState;
     var FreeText = vumigo.states.FreeText;
-    var PaginatedState = vumigo.states.PaginatedState;
     var MessengerPaginatedState = go.states.MessengerPaginatedState;
     var MessengerChoiceState = go.states.MessengerChoiceState;
 
@@ -318,18 +322,36 @@ go.app = function() {
                 .search_topics(self.im, self.im.config.es, {
                     search_category: opts.entities.search_category,
                     search_topic: opts.entities.search_topic,
-                    content: opts.content
+                    content: opts.question
                 })
                 .then(function (matches) {
-                    return new PaginatedState(name, {
-                        text: matches[0]._source.answer,
-                        characters_per_page: 320,
-                        more: $('More'),
-                        back: $('Back'),
-                        exit: $('Exit'),
-                        next: function() {
+                    return new FreeText(name, {
+                        question: matches[0]._source.answer.substring(0, 320-1),
+                        helper_metadata: function () {
                             return {
-                                name: 'states_end',
+                                'messenger': {
+                                    template_type: 'generic',
+                                    elements: matches.map(function (match, index) {
+                                        return {
+                                            title: match._source.question.substring(0, 45-4) + '...',
+                                            subtitle: match._source.answer.substring(0, 80-4) + '...',
+                                            buttons: [{
+                                                title: 'This looks correct',
+                                                payload: {
+                                                    content: (index + 1 + ''),
+                                                }
+                                            }]
+                                        };
+                                    })
+                                }
+                            };
+                        },
+                        next: function(content) {
+                            return {
+                                name: 'states_nlp_answer',
+                                creator_opts: {
+                                    match: matches[parseInt(content) - 1]._source
+                                }
                             };
                         }
                     });
@@ -338,7 +360,7 @@ go.app = function() {
 
         self.states.add('states_nlp_answer', function (name, opts) {
             return new EndState(name, {
-                text: opts.wit_metadata,
+                text: opts.match.answer,
                 next :'states_nlp',
             });
         });
@@ -355,10 +377,12 @@ go.app = function() {
                 faq_id: self.im.config.snappy.default_faq,
                 faq_label: self.im.config.snappy.default_label,
                 from_wit: opts.from_wit,
+                question: opts.question,
             });
           } else {
             return self.states.create('states_faqs', {
                 from_wit: opts.from_wit,
+                question: opts.question,
             });
           }
         });
@@ -392,6 +416,7 @@ go.app = function() {
                                 creator_opts: {
                                     faq_id: choice.value,
                                     faq_label: choice.label,
+                                    question: opts.question,
                                 }
                             };
                         }
@@ -426,7 +451,10 @@ go.app = function() {
                             return {
                                 name: 'states_questions',
                                 creator_opts: {
-                                    faq_id: opts.faq_id
+                                    faq_id: opts.faq_id,
+                                    category: opts.faq_label,
+                                    topic: choice.value,
+                                    question: opts.question,
                                 }
                             };
                         }
@@ -462,7 +490,10 @@ go.app = function() {
                                 return {
                                     name: 'states_answers',
                                     creator_opts: {
-                                        answer: answer
+                                        question: opts.question,
+                                        answer: answer,
+                                        category: opts.category,
+                                        topic: opts.topic,
                                     }
                                 };
                             }
@@ -484,7 +515,9 @@ go.app = function() {
                     return {
                         name: 'states_end',
                         creator_opts: {
-                            answer: opts.answer
+                            category: opts.category,
+                            topic: opts.topic,
+                            question: opts.question
                         }
                     };
                 }

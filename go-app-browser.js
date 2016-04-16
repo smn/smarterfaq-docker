@@ -179,19 +179,12 @@ go.utils = {
                             "match": {
                                 "topic": {
                                     "query": opts.topic,
-                                    "boost": 2.5
+                                    "boost": 1.2
                                 }
                             }
                         }, {
                             "match": {
                                 "answer": {
-                                    "query": opts.content,
-                                    "boost": 2
-                                }
-                            }
-                        },  {
-                            "match": {
-                                "question": {
                                     "query": opts.content,
                                     "boost": 1
                                 }

@@ -73,19 +73,12 @@ module.exports = function () {
                                 "match": {
                                     "topic": {
                                         "query": 'baby',
-                                        "boost": 2.5
+                                        "boost": 1.2
                                     }
                                 }
                             }, {
                                 "match": {
                                     "answer": {
-                                        "query": 'matching content',
-                                        "boost": 2
-                                    }
-                                }
-                            },  {
-                                "match": {
-                                    "question": {
                                         "query": 'matching content',
                                         "boost": 1
                                     }

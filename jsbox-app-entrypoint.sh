@@ -6,6 +6,7 @@ AMQP_VHOST=${AMQP_VHOST:-/}
 AMQP_USER=${AMQP_USER:-guest}
 AMQP_PASSWORD=${AMQP_PASSWORD:-guest}
 WIT_THRESHOLD=${WIT_THRESHOLD:-0.8}
+ES_ENDPOINT=${ES_ENDPOINT:"http://localhost:9200/_search"}
 
 cat > ./config.json <<-EOM
 {
@@ -24,6 +25,9 @@ cat > ./config.json <<-EOM
     "wit": {
         "token": "${WIT_TOKEN}",
         "confidence_threshold": ${WIT_THRESHOLD}
+    },
+    "es": {
+        "endpoint": "${ES_ENDPOINT}"
     }
 }
 EOM

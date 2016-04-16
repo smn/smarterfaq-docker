@@ -78,7 +78,7 @@ go.app = function() {
             if(answer.length > 320) {
                 return new MessengerPaginatedState(name, {
                     text: $(opts.match.answer),
-                    options_per_page: 8,
+                    characters_per_page: 320,
                     next: function (choice) {
                         return {
                             name: 'states_end',

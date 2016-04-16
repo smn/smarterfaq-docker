@@ -55,7 +55,7 @@ describe("app", function() {
                 return tester
                     .start()
                     .check.interaction({
-                        state: 'states_nlp',
+                        state: 'states_nlp_intro',
                         reply: /What question can I help you with\?/
                     })
                     .run();
@@ -63,7 +63,7 @@ describe("app", function() {
 
             it('should return the matches immediately if a match is found', function () {
                 return tester
-                    .setup.user.state('states_nlp')
+                    .setup.user.state('states_nlp_intro')
                     .input('matching content')
                     .check.reply(function (properties) {
                         md = properties.helper_metadata;
@@ -99,7 +99,7 @@ describe("app", function() {
                         assert.ok(messenger.text.length < 320);
                     })
                     .check.interaction({
-                        state: 'states_nlp_answer',
+                        state: 'states_search_answer',
                         reply: /Your baby needs a good mouthful/
                     })
                     .run();
@@ -110,7 +110,7 @@ describe("app", function() {
         describe('When the user starts a session', function () {
             it('should list all available FAQs', function () {
                 return tester
-                    .setup.user.state('states_nlp')
+                    .setup.user.state('states_nlp_intro')
                     .input('poor matching content')
                     .check.interaction({
                         state: 'states_faqs',
@@ -129,7 +129,7 @@ describe("app", function() {
                 return tester
                     .setup.user.state('states_end')
                     .check.interaction({
-                        state: 'states_nlp',
+                        state: 'states_nlp_intro',
                         reply: /Hello! What question can I help you with\?/
                     })
                     .run();
@@ -175,7 +175,7 @@ describe("app", function() {
         describe("T1. When the user starts a session", function() {
             it("should welcome and ask to choose topic", function() {
                 return tester
-                    .setup.user.state('states_nlp')
+                    .setup.user.state('states_nlp_intro')
                     .input('poor matching content')
                     .check.interaction({
                         state: 'states_topics',

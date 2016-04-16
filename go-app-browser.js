@@ -295,9 +295,28 @@ go.app = function() {
 
         self.states.add('states_nlp', function (name) {
             if (_.isEmpty(self.im.config.wit)) {
-                return self.states.create('states_start');
+                return self.states.create('states_start_snappy');
             }
 
+            // If we receive first input text that looks like something
+            // we should parse then dive straight in
+            if (self.im.msg.content && self.im.msg.content.match(/\w{5,}/i)) {
+                content = self.im.msg.content;
+                return go.utils
+                    .get_wit_converse(self.im, self.im.config.wit.token,
+                                      content, {
+                                          fallback: 'states_nlp_intro'
+                                      })
+                    .then(function (results) {
+                        entities = results.data.entities;
+                        return go.utils.dispatch_nlp(
+                            content, entities);
+                    });
+            }
+            return self.states.create('states_nlp_intro');
+        });
+
+        self.states.add('states_nlp_intro', function (name) {
             return new FreeText(name, {
                 question: $('Hello! What question can I help you with?'),
                 next: function (content) {
@@ -343,7 +362,7 @@ go.app = function() {
                         },
                         next: function(content) {
                             return {
-                                name: 'states_nlp_answer',
+                                name: 'states_search_answer',
                                 creator_opts: {
                                     match: matches[parseInt(content) - 1]._source
                                 }
@@ -353,7 +372,7 @@ go.app = function() {
                 });
         });
 
-        self.states.add('states_nlp_answer', function (name, opts) {
+        self.states.add('states_search_answer', function (name, opts) {
             answer = opts.match.answer;
             if(answer.length > 320) {
                 return new MessengerPaginatedState(name, {
@@ -376,11 +395,11 @@ go.app = function() {
 
         // fallback state for when NLP fails us
         self.states.add('states_fallback', function (name, opts) {
-            return self.states.create('states_start', opts);
+            return self.states.create('states_start_snappy', opts);
         });
 
         // Start - select topic
-        self.states.add('states_start', function(name, opts) {
+        self.states.add('states_start_snappy', function(name, opts) {
           if(self.im.config.snappy.default_faq) {
             return self.states.create('states_topics', {
                 faq_id: self.im.config.snappy.default_faq,

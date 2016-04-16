@@ -73,10 +73,8 @@ go.states = {
                     .then(function (choices) {
                         return {
                             messenger: {
-                                template_type: 'generic',
-                                title: i18n(opts.title),
-                                subtitle: i18n(opts.text),
-                                image_url: opts.image_url || '',
+                                template_type: 'button',
+                                text: i18n(opts.title),
                                 buttons: choices.map(function(choice_name, index) {
                                     return {
                                         title: i18n(self.choices[choice_name]),
@@ -359,10 +357,25 @@ go.app = function() {
         });
 
         self.states.add('states_nlp_answer', function (name, opts) {
-            return new EndState(name, {
-                text: opts.match.answer,
-                next :'states_nlp',
-            });
+            answer = opts.match.answer;
+            if(answer.length > 320) {
+                return new MessengerPaginatedState(name, {
+                    title: $(opts.match.question),
+                    question: $(opts.match.answer),
+                    options_per_page: 8,
+                    next: function (choice) {
+                        return {
+                            name: 'states_end',
+                        };
+                    }
+
+                });
+            } else {
+                return new EndState(name, {
+                    text: opts.match.answer,
+                    next :'states_nlp',
+                });
+            }
         });
 
         // fallback state for when NLP fails us

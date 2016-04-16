@@ -70,10 +70,8 @@ go.states = {
                     .then(function (choices) {
                         return {
                             messenger: {
-                                template_type: 'generic',
-                                title: i18n(opts.title),
-                                subtitle: i18n(opts.text),
-                                image_url: opts.image_url || '',
+                                template_type: 'button',
+                                text: i18n(opts.title),
                                 buttons: choices.map(function(choice_name, index) {
                                     return {
                                         title: i18n(self.choices[choice_name]),

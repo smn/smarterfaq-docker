@@ -96,12 +96,8 @@ describe("app", function() {
                 return tester
                     .setup.user.state('states_end')
                     .check.interaction({
-                        state: 'states_faqs',
-                        reply: [
-                            'Please choose a category:',
-                            '1. English',
-                            '2. French'
-                        ].join('\n')
+                        state: 'states_nlp',
+                        reply: /Hello! What question can I help you with\?/
                     })
                     .run();
             });

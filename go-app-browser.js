@@ -495,7 +495,7 @@ go.app = function() {
         self.states.add('states_end', function(name, opts) {
             return new EndState(name, {
                 text: $('Thank you and visit again!'),
-                next: 'states_start'
+                next: 'states_nlp'
             });
         });
 

@@ -152,7 +152,10 @@ go.utils = {
             return {
                 name: 'states_search',
                 creator_opts: {
-                    entity: entities.search_category[0].value,
+                    entities: {
+                        search_category: entities.search_category[0].value,
+                        search_topic: entities.search_topic[0].value,
+                    },
                     content: content
                 }
             };
@@ -178,8 +181,15 @@ go.utils = {
                         "should": [{
                             "match": {
                                 "topic": {
-                                    "query": opts.topic,
+                                    "query": opts.search_category,
                                     "boost": 1.2
+                                }
+                            }
+                        }, {
+                            "match": {
+                                "answer": {
+                                    "query": opts.search_topic,
+                                    "boost": 2,
                                 }
                             }
                         }, {
@@ -306,7 +316,8 @@ go.app = function() {
         self.states.add('states_search', function (name, opts) {
             return go.utils
                 .search_topics(self.im, self.im.config.es, {
-                    topic: opts.entity,
+                    search_category: opts.entities.search_category,
+                    search_topic: opts.entities.search_topic,
                     content: opts.content
                 })
                 .then(function (matches) {

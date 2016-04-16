@@ -22,8 +22,11 @@ module.exports = function () {
                     "confidence" : 1,
                     "type" : "merge",
                     "entities" : {
-                    "search_category" : [{
-                        "value" : "baby"
+                        "search_category" : [{
+                            "value" : "baby"
+                        }],
+                        "search_topic": [{
+                            "value": "breastfeeding"
                         }]
                     }
                 }
@@ -74,6 +77,13 @@ module.exports = function () {
                                     "topic": {
                                         "query": 'baby',
                                         "boost": 1.2
+                                    }
+                                }
+                            }, {
+                                "match": {
+                                    "answer": {
+                                        "query": 'breastfeeding',
+                                        "boost": 2
                                     }
                                 }
                             }, {

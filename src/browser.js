@@ -36,7 +36,8 @@ go.app = function() {
         self.states.add('states_search', function (name, opts) {
             return go.utils
                 .search_topics(self.im, self.im.config.es, {
-                    topic: opts.entity,
+                    search_category: opts.entities.search_category,
+                    search_topic: opts.entities.search_topic,
                     content: opts.content
                 })
                 .then(function (matches) {

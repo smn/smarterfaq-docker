@@ -36,6 +36,9 @@ describe("app", function() {
                     wit: {
                         token: 'the token',
                         confidence_threshold: 0.8
+                    },
+                    es: {
+                        endpoint: 'http://eshost/_search'
                     }
                 })
                 .setup(function(api) {
@@ -63,23 +66,12 @@ describe("app", function() {
                     .setup.user.state('states_nlp')
                     .input('matching content')
                     .check.interaction({
-                        state: 'states_nlp_answer',
-                        reply: /Yes you can get pregnant while breastfeeding/
+                        state: 'states_search',
+                        reply: /Your baby needs a good mouthful/
                     })
-                    .check.reply.ends_session()
                     .run();
-            })
+            });
 
-            it('should handle getting default_intent back', function () {
-                return tester
-                    .setup.user.state('states_nlp')
-                    .input('no matching content')
-                    .check.interaction({
-                        state: 'states_faqs',
-                        reply: /Sorry, could not find a suitable match. Please choose a category\:/
-                    })
-                    .run();
-            })
         });
 
         describe('When the user starts a session', function () {

@@ -1,98 +1,124 @@
 module.exports = function () {
     return [
-        // WIT response
+        // WIT converse response
         {
             'repeatable': true,
             'request': {
-                'method': 'GET',
+                'method': 'POST',
                 'headers': {
                     'Authorization': ['Bearer token'],
                     'Content-TYpe': ['application/json']
                 },
-                'url': 'https://api.wit.ai/message',
+                'url': 'https://api.wit.ai/converse',
                 'params': {
-                    'v': '20141022',
+                    'v': '20160330',
+                    'session_id': '+27123456789',
                     'q': 'matching content'
                 }
             },
             'response': {
                 'code': '200',
                 'data': {
-                    "msg_id": "c949549a-9452-4787-bac1-5922eafa6bb3",
-                    "_text": "I am breastfeeding, can I have sex?",
-                    "outcomes": [{
-                        "_text": "I am breastfeeding, can I have sex?",
-                        "confidence": 0.995,
-                        "intent": "baby_can_i_get_pregnant_if_i_have_sex_while_breastfeeding",
-                        "entities": {},
-                        "metadata": "Yes you can get pregnant while breastfeeding. Getting pregnant too soon can be dangerous for you, and your next baby could be born weak and early.\nIt's best to not have sex for at least 6 weeks after birth or until you have healed. When you start having sex, use a family planning method. This will prevent you from getting pregnant too early. There are plenty of options to choose from. Condoms will prevent pregnancy and sexually transmitted infections and diseases."
-                    }]
+                    "confidence" : 1,
+                    "type" : "merge",
+                    "entities" : {
+                    "search_category" : [{
+                        "value" : "baby"
+                        }]
+                    }
                 }
             }
         },
+
+        // WIT converse response
         {
             'repeatable': true,
             'request': {
-                'method': 'GET',
+                'method': 'POST',
                 'headers': {
                     'Authorization': ['Bearer token'],
                     'Content-TYpe': ['application/json']
                 },
-                'url': 'https://api.wit.ai/message',
+                'url': 'https://api.wit.ai/converse',
                 'params': {
-                    'v': '20141022',
+                    'v': '20160330',
+                    'session_id': '+27123456789',
                     'q': 'poor matching content'
                 }
             },
             'response': {
                 'code': '200',
                 'data': {
-                    "msg_id": "c949549a-9452-4787-bac1-5922eafa6bb3",
-                    "_text": "I am breastfeeding, can I have sex?",
-                    "outcomes": [{
-                        "_text": "I am breastfeeding, can I have sex?",
-                        "confidence": 0.1,
-                        "intent": "baby_can_i_get_pregnant_if_i_have_sex_while_breastfeeding",
-                        "entities": {},
-                        "metadata": "This is a terrible answer"
-                    }]
+                    "confidence" : 1,
+                    "type" : "merge",
+                    "entities" : {}
                 }
             }
         },
+
+
+        // ES search
         {
             'repeatable': true,
             'request': {
                 'method': 'GET',
                 'headers': {
-                    'Authorization': ['Bearer token'],
-                    'Content-TYpe': ['application/json']
+                    'Content-Type': ['application/json'],
                 },
-                'url': 'https://api.wit.ai/message',
-                'params': {
-                    'v': '20141022',
-                    'q': 'no matching content'
+                'url': 'http://eshost/_search',
+                'data': {
+                    "query": {
+                        "bool": {
+                            "should": [{
+                                "match": {
+                                    "topic": {
+                                        "query": 'baby',
+                                        "boost": 2.5
+                                    }
+                                }
+                            }, {
+                                "match": {
+                                    "answer": 'matching content',
+                                    "boost": 2
+                                }
+                            },  {
+                                "match": {
+                                    "question": 'matching content',
+                                    "boost": 1
+                                }
+                            }]
+                        }
+                    }
                 }
             },
             'response': {
-                'code': '200',
+                'code': 200,
                 'data': {
-                    "msg_id" : "bbd55436-5470-464c-8421-7d0135dc2a31",
-                    "_text" : "when do I need to take my baby to the clinic?",
-                    "outcomes" : [ {
-                        "_text" : "when do I need to take my baby to the clinic?",
-                        "confidence" : 0.983,
-                        "intent" : "default_intent",
-                        "entities" : {
-                            "topic" : [ {
-                                "type" : "value",
-                                "value" : "baby"
-                            } ],
-                            "sub_topic" : [ {
-                                "type" : "value",
-                                "value" : "clinic"
-                            } ]
-                        }
-                    }]
+                    "took": 19,
+                    "timed_out": false,
+                    "_shards": {
+                        "total": 5,
+                        "successful": 5,
+                        "failed": 0
+                    },
+                    "hits": {
+                        "total": 17,
+                        "max_score": 0.6873727,
+                        "hits": [
+                            {
+                                "_index": "faqs",
+                                "_type": "questions",
+                                "_id": "2018",
+                                "_score": 0.6873727,
+                                "_source": {
+                                    "topic": "Baby",
+                                    "answer": "Your baby needs a good mouthful of your breast to feed well. Check that he has most of the dark area around your nipple in his mouth. If you see his jaw moving up and down as he feeds, you know he has latched on. Getting your baby to latch on well will prevent your nipples from getting sore.",
+                                "question_id": 2018,
+                                "question": "Latching",
+                                "topic_id": 903
+                            }
+                        }]
+                    }
                 }
             }
         },

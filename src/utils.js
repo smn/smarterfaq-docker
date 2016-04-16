@@ -128,6 +128,76 @@ go.utils = {
         return (!_.isUndefined(bool) && (bool==='true' || bool===true));
     },
 
+    get_wit_converse: function (im, token, content) {
+        var http = new JsonApi(im, {
+            headers: {
+                'Authorization': ['Bearer ' + token],
+                'Content-Type': ['application/json'],
+            }
+        });
+        return http.post('https://api.wit.ai/converse', {
+            params: {
+                v: '20160330',
+                session_id: im.user.addr,
+                q: content
+            }
+        });
+    },
+
+    dispatch_nlp: function (content, entities) {
+        if (!_.isEmpty(entities.search_category)) {
+            return {
+                name: 'states_search',
+                creator_opts: {
+                    entity: entities.search_category[0].value,
+                    content: content
+                }
+            };
+        }
+        return {
+            name: 'states_fallback',
+            creator_opts: {
+                from_wit: true
+            }
+        };
+    },
+
+    search_topics: function (im, es, opts) {
+        var http = new JsonApi(im, {
+            headers: {
+                'Content-Type': ['application/json'],
+            }
+        });
+        return http.get(es.endpoint, {
+            data: {
+                "query": {
+                    "bool": {
+                        "should": [{
+                            "match": {
+                                "topic": {
+                                    "query": opts.topic,
+                                    "boost": 2.5
+                                }
+                            }
+                        }, {
+                            "match": {
+                                "answer": opts.content,
+                                "boost": 2
+                            }
+                        },  {
+                            "match": {
+                                "question": opts.content,
+                                "boost": 1
+                            }
+                        }]
+                    }
+                }
+            }
+        }).then(function (results) {
+            return results.data.hits.hits;
+        });
+    },
+
     get_wit_intent: function (im, token, content) {
         var http = new JsonApi(im, {
             headers: {

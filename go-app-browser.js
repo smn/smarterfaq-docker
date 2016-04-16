@@ -131,6 +131,76 @@ go.utils = {
         return (!_.isUndefined(bool) && (bool==='true' || bool===true));
     },
 
+    get_wit_converse: function (im, token, content) {
+        var http = new JsonApi(im, {
+            headers: {
+                'Authorization': ['Bearer ' + token],
+                'Content-Type': ['application/json'],
+            }
+        });
+        return http.post('https://api.wit.ai/converse', {
+            params: {
+                v: '20160330',
+                session_id: im.user.addr,
+                q: content
+            }
+        });
+    },
+
+    dispatch_nlp: function (content, entities) {
+        if (!_.isEmpty(entities.search_category)) {
+            return {
+                name: 'states_search',
+                creator_opts: {
+                    entity: entities.search_category[0].value,
+                    content: content
+                }
+            };
+        }
+        return {
+            name: 'states_fallback',
+            creator_opts: {
+                from_wit: true
+            }
+        };
+    },
+
+    search_topics: function (im, es, opts) {
+        var http = new JsonApi(im, {
+            headers: {
+                'Content-Type': ['application/json'],
+            }
+        });
+        return http.get(es.endpoint, {
+            data: {
+                "query": {
+                    "bool": {
+                        "should": [{
+                            "match": {
+                                "topic": {
+                                    "query": opts.topic,
+                                    "boost": 2.5
+                                }
+                            }
+                        }, {
+                            "match": {
+                                "answer": opts.content,
+                                "boost": 2
+                            }
+                        },  {
+                            "match": {
+                                "question": opts.content,
+                                "boost": 1
+                            }
+                        }]
+                    }
+                }
+            }
+        }).then(function (results) {
+            return results.data.hits.hits;
+        });
+    },
+
     get_wit_intent: function (im, token, content) {
         var http = new JsonApi(im, {
             headers: {
@@ -201,6 +271,7 @@ go.app = function() {
     var Choice = vumigo.states.Choice;
     var EndState = vumigo.states.EndState;
     var FreeText = vumigo.states.FreeText;
+    var PaginatedState = vumigo.states.PaginatedState;
     var MessengerPaginatedState = go.states.MessengerPaginatedState;
     var MessengerChoiceState = go.states.MessengerChoiceState;
 
@@ -217,34 +288,36 @@ go.app = function() {
                 question: $('Hello! What question can I help you with?'),
                 next: function (content) {
                     return go.utils
-                        .get_wit_intent(self.im, self.im.config.wit.token, content)
+                        .get_wit_converse(self.im, self.im.config.wit.token, content)
                         .then(function (results) {
-                            return self.im
-                                .log(results)
-                                .then(function () {
-                                    return results;
-                                });
-                        })
-                        .then(function (results) {
-                            var all_outcomes = _.sortBy(results.data.outcomes, 'confidence');
-                            var outcomes = _.filter(all_outcomes, function (outcome) {
-                                return outcome.confidence > self.im.config.wit.confidence_threshold;
-                            });
-                            if (_.isEmpty(outcomes) || _.isEmpty(outcomes[0].metadata)) {
-                                return self.states.create('states_start', {
-                                  from_wit: true
-                                });
-                            }
-
-                            return {
-                              name: 'states_nlp_answer',
-                              creator_opts: {
-                                wit_metadata: outcomes[0].metadata.substring(0, 319)
-                              }
-                            };
+                            entities = results.data.entities;
+                            return go.utils.dispatch_nlp(
+                                content, entities);
                         });
                 }
             });
+        });
+
+        self.states.add('states_search', function (name, opts) {
+            return go.utils
+                .search_topics(self.im, self.im.config.es, {
+                    topic: opts.entity,
+                    content: opts.content
+                })
+                .then(function (matches) {
+                    return new PaginatedState(name, {
+                        text: matches[0]._source.answer,
+                        characters_per_page: 320,
+                        more: $('More'),
+                        back: $('Back'),
+                        exit: $('Exit'),
+                        next: function() {
+                            return {
+                                name: 'states_end',
+                            };
+                        }
+                    });
+                });
         });
 
         self.states.add('states_nlp_answer', function (name, opts) {
@@ -252,6 +325,11 @@ go.app = function() {
                 text: opts.wit_metadata,
                 next :'states_nlp',
             });
+        });
+
+        // fallback state for when NLP fails us
+        self.states.add('states_fallback', function (name, opts) {
+            return self.states.create('states_start', opts);
         });
 
         // Start - select topic

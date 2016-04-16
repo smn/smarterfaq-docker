@@ -68,7 +68,7 @@ go.states = {
                         return {
                             messenger: {
                                 template_type: 'button',
-                                text: i18n(opts.title),
+                                text: i18n(self.page(i, text, n)),
                                 buttons: choices.map(function(choice_name, index) {
                                     return {
                                         title: i18n(self.choices[choice_name]),

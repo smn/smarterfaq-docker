@@ -71,7 +71,7 @@ go.states = {
                         return {
                             messenger: {
                                 template_type: 'button',
-                                text: i18n(opts.title),
+                                text: i18n(self.page(i, text, n)),
                                 buttons: choices.map(function(choice_name, index) {
                                     return {
                                         title: i18n(self.choices[choice_name]),
@@ -357,7 +357,6 @@ go.app = function() {
             answer = opts.match.answer;
             if(answer.length > 320) {
                 return new MessengerPaginatedState(name, {
-                    title: $(opts.match.answer),
                     text: $(opts.match.answer),
                     options_per_page: 8,
                     next: function (choice) {

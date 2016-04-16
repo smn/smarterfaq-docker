@@ -94,11 +94,14 @@ describe("app", function() {
                         }
                     })
                     .input('1')
+                    .check.reply(function(props) {
+                        messenger = props.helper_metadata.messenger;
+                        assert.ok(messenger.text.length < 320);
+                    })
                     .check.interaction({
                         state: 'states_nlp_answer',
                         reply: /Your baby needs a good mouthful/
                     })
-                    .check.reply.ends_session()
                     .run();
             });
 

@@ -111,15 +111,26 @@ module.exports = function () {
                     "hits": {
                         "total": 17,
                         "max_score": 0.6873727,
-                        "hits": [
-                            {
-                                "_index": "faqs",
-                                "_type": "questions",
-                                "_id": "2018",
-                                "_score": 0.6873727,
-                                "_source": {
-                                    "topic": "Baby",
-                                    "answer": "Your baby needs a good mouthful of your breast to feed well. Check that he has most of the dark area around your nipple in his mouth. If you see his jaw moving up and down as he feeds, you know he has latched on. Getting your baby to latch on well will prevent your nipples from getting sore.",
+                        "hits": [ {
+                            "_index": "faqs",
+                            "_type": "questions",
+                            "_id": "2018",
+                            "_score": 0.6873727,
+                            "_source": {
+                                "topic": "Baby",
+                                "answer": "Your baby needs a good mouthful of your breast to feed well. Check that he has most of the dark area around your nipple in his mouth. If you see his jaw moving up and down as he feeds, you know he has latched on. Getting your baby to latch on well will prevent your nipples from getting sore. Your baby needs a good mouthful of your breast to feed well. Check that he has most of the dark area around your nipple in his mouth. If you see his jaw moving up and down as he feeds, you know he has latched on. Getting your baby to latch on well will prevent your nipples from getting sore.",
+                                "question_id": 2018,
+                                "question": "Latching",
+                                "topic_id": 903
+                            }
+                        }, {
+                            "_index": "faqs",
+                            "_type": "questions",
+                            "_id": "2018",
+                            "_score": 0.6873727,
+                            "_source": {
+                                "topic": "Baby",
+                                "answer": "Your baby needs a good mouthful of your breast to feed well. Check that he has most of the dark area around your nipple in his mouth. If you see his jaw moving up and down as he feeds, you know he has latched on. Getting your baby to latch on well will prevent your nipples from getting sore. Your baby needs a good mouthful of your breast to feed well. Check that he has most of the dark area around your nipple in his mouth. If you see his jaw moving up and down as he feeds, you know he has latched on. Getting your baby to latch on well will prevent your nipples from getting sore.",
                                 "question_id": 2018,
                                 "question": "Latching",
                                 "topic_id": 903

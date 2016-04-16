@@ -17,6 +17,7 @@ cat > ./config.json <<-EOM
         "account_id": "${SNAPPY_ACCOUNT_ID}",
         "default_faq": "${SNAPPY_DEFAULT_FAQ}"
     },
+    "helpdesk_hours": [8, 16],
     "endpoints": {
         "sms": {
             "delivery_class": "sms"

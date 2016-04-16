@@ -19,19 +19,19 @@ cat > ./config.json <<-EOM
     },
     "helpdesk_hours": [8, 16],
     "public_holidays": [
-        "2015-01-01",  // new year's day
-        "2015-03-21",  // human rights day
-        "2015-04-03",  // good friday - VARIES
-        "2015-04-06",  // family day - VARIES
-        "2015-04-27",  // freedom day
-        "2015-05-01",  // worker's day
-        "2015-06-16",  // youth day
-        "2015-08-09",  // women's day
-        "2015-08-10",  // women's day OBSERVED (Sunday -> Monday)
-        "2015-09-24",  // heritage day
-        "2015-12-16",  // day of reconciliation
-        "2015-12-25",  // christmas day
-        "2015-12-26"   // day of goodwill
+        "2015-01-01",
+        "2015-03-21",
+        "2015-04-03",
+        "2015-04-06",
+        "2015-04-27",
+        "2015-05-01",
+        "2015-06-16",
+        "2015-08-09",
+        "2015-08-10",
+        "2015-09-24",
+        "2015-12-16",
+        "2015-12-25",
+        "2015-12-26"
     ],
     "endpoints": {
         "sms": {

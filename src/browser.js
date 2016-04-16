@@ -29,8 +29,10 @@ go.app = function() {
                                       })
                     .then(function (results) {
                         entities = results.data.entities;
-                        return go.utils.dispatch_nlp(
+                        dispatch = go.utils.dispatch_nlp(
                             content, entities);
+                        return self.states.create(
+                            dispatch.name, dispatch.creator_opts);
                     });
             }
             return self.states.create('states_nlp_intro');

@@ -61,6 +61,19 @@ describe("app", function() {
                     .run();
             });
 
+            it('should return results if starting off with a question', function () {
+                return tester
+                    .inputs({
+                        content: 'matching content',
+                        session_event: 'new',
+                    })
+                    .check.interaction({
+                        state: 'states_search',
+                        reply: /Your baby needs a good mouthful/
+                    })
+                    .run();
+            });
+
             it('should return the matches immediately if a match is found', function () {
                 return tester
                     .setup.user.state('states_nlp_intro')

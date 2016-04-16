@@ -4,6 +4,7 @@ var Q = require('q');
 var JsonApi = vumigo.http.api.JsonApi;
 var PaginatedState = vumigo.states.PaginatedState;
 var PaginatedChoiceState = vumigo.states.PaginatedChoiceState;
+var moment = require('moment');
 
 go.states = {
     MessengerChoiceState: PaginatedChoiceState.extend(function(self, name, opts) {
@@ -91,13 +92,34 @@ go.states = {
 
 go.utils = {
 
-
     // Shared utils lib
+    is_out_of_hours: function(config) {
+        var today = go.utils.get_today(config);
+        var moment_today = moment.utc(today);
+        // get business hours from config, -2 for utc to local time conversion
+        var opening_time = Math.min.apply(null, config.helpdesk_hours) - 2;
+        var closing_time = Math.max.apply(null, config.helpdesk_hours) - 2;
+        return (moment_today.hour() < opening_time || moment_today.hour() >= closing_time);
+    },
+
+    is_weekend: function(config) {
+        var today = go.utils.get_today(config);
+        var moment_today = moment.utc(today);
+        return moment_today.format('dddd') === 'Saturday' ||
+          moment_today.format('dddd') === 'Sunday';
+    },
+
+    is_public_holiday: function(config) {
+        var today = go.utils.get_today(config);
+        var moment_today = moment.utc(today);
+        var date_as_string = moment_today.format('YYYY-MM-DD');
+        return _.contains(config.public_holidays, date_as_string);
+    },
 
     get_today: function(config) {
         var today;
         if (config.testing_today) {
-            today = new Date(config.testing_today);
+            today = moment(config.testing_today);
         } else {
             today = new Date();
         }
@@ -140,6 +162,15 @@ go.utils = {
     },
 
     dispatch_nlp: function (content, entities) {
+        if (!_.isEmpty(entities.action) && entities.action[0].value == 'helpdesk') {
+            return {
+                name: 'states_helpdesk',
+                creator_opts: {
+                    question: content
+                }
+            };
+        }
+
         if (!_.isEmpty(entities.search_category)) {
             return {
                 name: 'states_search',
@@ -152,6 +183,7 @@ go.utils = {
                 }
             };
         }
+
         return {
             name: 'states_fallback',
             creator_opts: {

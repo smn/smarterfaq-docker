@@ -1,6 +1,36 @@
 module.exports = function () {
     return [
-        // WIT converse response
+        // WIT converse response for helpdesk
+        {
+            'repeatable': true,
+            'request': {
+                'method': 'POST',
+                'headers': {
+                    'Authorization': ['Bearer token'],
+                    'Content-TYpe': ['application/json']
+                },
+                'url': 'https://api.wit.ai/converse',
+                'params': {
+                    'v': '20160330',
+                    'session_id': '+27123456789',
+                    'q': 'helpdesk please'
+                }
+            },
+            'response': {
+                'code': '200',
+                'data': {
+                    "confidence" : 1,
+                    "type" : "merge",
+                    "entities" : {
+                        "action" : [{
+                            "value" : "helpdesk"
+                        }]
+                    }
+                }
+            }
+        },
+
+        // WIT converse response for matching
         {
             'repeatable': true,
             'request': {
@@ -33,7 +63,7 @@ module.exports = function () {
             }
         },
 
-        // WIT converse response
+        // WIT converse response for poor match
         {
             'repeatable': true,
             'request': {

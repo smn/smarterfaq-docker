@@ -120,6 +120,69 @@ go.app = function() {
             return self.states.create('states_start_snappy', opts);
         });
 
+        self.states.add('states_helpdesk', function(name) {
+
+            var out_of_hours_text =
+                $("The helpdesk operates from 8am to 4pm Mon to Fri. " +
+                  "Responses will be delayed outside of these hrs. In an " +
+                  "emergency please go to your health provider immediately.");
+
+            var weekend_public_holiday_text =
+                $("The helpdesk is not currently available during weekends " +
+                  "and public holidays. In an emergency please go to your " +
+                  "health provider immediately.");
+
+            var question =
+                $("What is your question for the helpdesk?");
+
+            if (go.utils.is_out_of_hours(self.im.config)) {
+                text = out_of_hours_text + '\n\n' + question;
+            } else if (go.utils.is_weekend(self.im.config) ||
+              go.utils.is_public_holiday(self.im.config)) {
+                text = weekend_public_holiday_text + '\n\n' + question;
+            } else {
+                text = question;
+            }
+
+            return new FreeText(name, {
+                question: question,
+                next: 'states_helpdesk_response',
+            });
+        });
+
+        self.states.add('states_helpdesk_response', function(name, opts) {
+            var out_of_hours_text =
+                $("The helpdesk operates from 8am to 4pm Mon to Fri. " +
+                  "Responses will be delayed outside of these hrs. In an " +
+                  "emergency please go to your health provider immediately.");
+
+            var weekend_public_holiday_text =
+                $("The helpdesk is not currently available during weekends " +
+                  "and public holidays. In an emergency please go to your " +
+                  "health provider immediately.");
+
+            var business_hours_text =
+                $("Thank you for your message, it has been captured and you will receive a " +
+                "response soon. Kind regards. MomConnect.");
+
+            if (go.utils.is_out_of_hours(self.im.config)) {
+                text = (opts.from_wit
+                        ? out_of_hours_text + '\n\n' + business_hours_text
+                        : business_hours_text);
+            } else if (go.utils.is_weekend(self.im.config) ||
+              go.utils.is_public_holiday(self.im.config)) {
+                text = (opts.from_wit
+                        ? weekend_public_holiday_text + '\n\n' + business_hours_text
+                        : business_hours_text);
+            } else {
+                text = business_hours_text;
+            }
+
+            return new EndState(name, {
+                text: text,
+                next: 'states_start'
+            });
+        });
         // Start - select topic
         self.states.add('states_start_snappy', function(name, opts) {
           if(self.im.config.snappy.default_faq) {

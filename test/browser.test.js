@@ -26,13 +26,14 @@ describe("app", function() {
                     env: 'test',
                     metric_store: 'test_metric_store',
                     testing: 'true',
-                    testing_today: 'April 4, 2014 07:07:07',
+                    testing_today: '2014-04-04 08:08:08.000+02:00',
                     snappy: {
                         "endpoint": "https://app.besnappy.com/api/v1/",
                         "username": "980d2423-292b-4c34-be81-c74784b9e99a",
                         "account_id": "1"
                         // NOTE: default_faq is not set
                     },
+                    helpdesk_hours: [8, 16],
                     wit: {
                         token: 'the token',
                         confidence_threshold: 0.8
@@ -49,8 +50,29 @@ describe("app", function() {
                 });
         });
 
+        describe('using Wit for Helpdesk', function () {
+            it('should ask the question for the helpdesk', function () {
+                return tester
+                    .setup.user.state('states_nlp_intro')
+                    .input('helpdesk please')
+                    .check.interaction({
+                        reply: /What is your question for the helpdesk\?/i
+                    })
+                    .run();
+            });
 
-        describe('using Wit', function () {
+            it('should relay the question to the helpdesk', function () {
+                return tester
+                    .setup.user.state('states_helpdesk')
+                    .input('Can I do such and such?')
+                    .check.interaction({
+                        state: 'states_helpdesk_response',
+                        reply: /Thank you for your message/i
+                    })
+            })
+        });
+
+        describe('using Wit for FAQ', function () {
             it('ask for the question', function () {
                 return tester
                     .start()
@@ -157,6 +179,7 @@ describe("app", function() {
     describe("for browsing FAQ topics", function() {
 
         beforeEach(function() {
+
             tester
                 .setup.char_limit(160)
                 .setup.config.app({
@@ -164,7 +187,7 @@ describe("app", function() {
                     env: 'test',
                     metric_store: 'test_metric_store',
                     testing: 'true',
-                    testing_today: 'April 4, 2014 07:07:07',
+                    testing_today: '2014-04-04 08:08:08.000+02:00',
                     snappy: {
                         "endpoint": "https://app.besnappy.com/api/v1/",
                         "username": "980d2423-292b-4c34-be81-c74784b9e99a",

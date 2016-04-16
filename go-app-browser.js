@@ -7,6 +7,7 @@ var Q = require('q');
 var JsonApi = vumigo.http.api.JsonApi;
 var PaginatedState = vumigo.states.PaginatedState;
 var PaginatedChoiceState = vumigo.states.PaginatedChoiceState;
+var moment = require('moment');
 
 go.states = {
     MessengerChoiceState: PaginatedChoiceState.extend(function(self, name, opts) {
@@ -94,13 +95,34 @@ go.states = {
 
 go.utils = {
 
-
     // Shared utils lib
+    is_out_of_hours: function(config) {
+        var today = go.utils.get_today(config);
+        var moment_today = moment.utc(today);
+        // get business hours from config, -2 for utc to local time conversion
+        var opening_time = Math.min.apply(null, config.helpdesk_hours) - 2;
+        var closing_time = Math.max.apply(null, config.helpdesk_hours) - 2;
+        return (moment_today.hour() < opening_time || moment_today.hour() >= closing_time);
+    },
+
+    is_weekend: function(config) {
+        var today = go.utils.get_today(config);
+        var moment_today = moment.utc(today);
+        return moment_today.format('dddd') === 'Saturday' ||
+          moment_today.format('dddd') === 'Sunday';
+    },
+
+    is_public_holiday: function(config) {
+        var today = go.utils.get_today(config);
+        var moment_today = moment.utc(today);
+        var date_as_string = moment_today.format('YYYY-MM-DD');
+        return _.contains(config.public_holidays, date_as_string);
+    },
 
     get_today: function(config) {
         var today;
         if (config.testing_today) {
-            today = new Date(config.testing_today);
+            today = moment(config.testing_today);
         } else {
             today = new Date();
         }
@@ -143,6 +165,15 @@ go.utils = {
     },
 
     dispatch_nlp: function (content, entities) {
+        if (!_.isEmpty(entities.action) && entities.action[0].value == 'helpdesk') {
+            return {
+                name: 'states_helpdesk',
+                creator_opts: {
+                    question: content
+                }
+            };
+        }
+
         if (!_.isEmpty(entities.search_category)) {
             return {
                 name: 'states_search',
@@ -155,6 +186,7 @@ go.utils = {
                 }
             };
         }
+
         return {
             name: 'states_fallback',
             creator_opts: {
@@ -400,6 +432,69 @@ go.app = function() {
             return self.states.create('states_start_snappy', opts);
         });
 
+        self.states.add('states_helpdesk', function(name) {
+
+            var out_of_hours_text =
+                $("The helpdesk operates from 8am to 4pm Mon to Fri. " +
+                  "Responses will be delayed outside of these hrs. In an " +
+                  "emergency please go to your health provider immediately.");
+
+            var weekend_public_holiday_text =
+                $("The helpdesk is not currently available during weekends " +
+                  "and public holidays. In an emergency please go to your " +
+                  "health provider immediately.");
+
+            var question =
+                $("What is your question for the helpdesk?");
+
+            if (go.utils.is_out_of_hours(self.im.config)) {
+                text = out_of_hours_text + '\n\n' + question;
+            } else if (go.utils.is_weekend(self.im.config) ||
+              go.utils.is_public_holiday(self.im.config)) {
+                text = weekend_public_holiday_text + '\n\n' + question;
+            } else {
+                text = question;
+            }
+
+            return new FreeText(name, {
+                question: question,
+                next: 'states_helpdesk_response',
+            });
+        });
+
+        self.states.add('states_helpdesk_response', function(name, opts) {
+            var out_of_hours_text =
+                $("The helpdesk operates from 8am to 4pm Mon to Fri. " +
+                  "Responses will be delayed outside of these hrs. In an " +
+                  "emergency please go to your health provider immediately.");
+
+            var weekend_public_holiday_text =
+                $("The helpdesk is not currently available during weekends " +
+                  "and public holidays. In an emergency please go to your " +
+                  "health provider immediately.");
+
+            var business_hours_text =
+                $("Thank you for your message, it has been captured and you will receive a " +
+                "response soon. Kind regards. MomConnect.");
+
+            if (go.utils.is_out_of_hours(self.im.config)) {
+                text = (opts.from_wit
+                        ? out_of_hours_text + '\n\n' + business_hours_text
+                        : business_hours_text);
+            } else if (go.utils.is_weekend(self.im.config) ||
+              go.utils.is_public_holiday(self.im.config)) {
+                text = (opts.from_wit
+                        ? weekend_public_holiday_text + '\n\n' + business_hours_text
+                        : business_hours_text);
+            } else {
+                text = business_hours_text;
+            }
+
+            return new EndState(name, {
+                text: text,
+                next: 'states_start'
+            });
+        });
         // Start - select topic
         self.states.add('states_start_snappy', function(name, opts) {
           if(self.im.config.snappy.default_faq) {

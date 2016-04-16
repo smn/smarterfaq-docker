@@ -193,7 +193,15 @@ go.utils = {
                     }
                 }
             }
-        }).then(function (results) {
+        })
+        .then(function (results) {
+            return im
+                .log(results)
+                .then(function () {
+                    return results;
+                });
+        })
+        .then(function (results) {
             return results.data.hits.hits;
         });
     },

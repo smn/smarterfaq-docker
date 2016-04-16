@@ -358,7 +358,7 @@ go.app = function() {
             if(answer.length > 320) {
                 return new MessengerPaginatedState(name, {
                     title: $(opts.match.question),
-                    question: $(opts.match.answer),
+                    text: $(opts.match.answer),
                     options_per_page: 8,
                     next: function (choice) {
                         return {

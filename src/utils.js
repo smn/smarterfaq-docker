@@ -181,13 +181,17 @@ go.utils = {
                             }
                         }, {
                             "match": {
-                                "answer": opts.content,
-                                "boost": 2
+                                "answer": {
+                                    "query": opts.content,
+                                    "boost": 2
+                                }
                             }
                         },  {
                             "match": {
-                                "question": opts.content,
-                                "boost": 1
+                                "question": {
+                                    "query": opts.content,
+                                    "boost": 1
+                                }
                             }
                         }]
                     }

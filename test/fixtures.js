@@ -78,13 +78,17 @@ module.exports = function () {
                                 }
                             }, {
                                 "match": {
-                                    "answer": 'matching content',
-                                    "boost": 2
+                                    "answer": {
+                                        "query": 'matching content',
+                                        "boost": 2
+                                    }
                                 }
                             },  {
                                 "match": {
-                                    "question": 'matching content',
-                                    "boost": 1
+                                    "question": {
+                                        "query": 'matching content',
+                                        "boost": 1
+                                    }
                                 }
                             }]
                         }

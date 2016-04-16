@@ -80,7 +80,7 @@ go.app = function() {
                                             title: match._source.question.substring(0, 45-4) + '...',
                                             subtitle: match._source.answer.substring(0, 80-4) + '...',
                                             buttons: [{
-                                                title: 'This looks correct',
+                                                title: 'Expand this please',
                                                 payload: {
                                                     content: (index + 1 + ''),
                                                 }

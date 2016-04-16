@@ -121,7 +121,7 @@ describe("app", function() {
                         assert.equal(element.title, 'Latching...');
                         assert.equal(element.subtitle, 'Your baby needs a good mouthful of your breast to feed well. Check that he h...')
                         button = element.buttons[0]
-                        assert.equal(button.title, 'This looks correct');
+                        assert.equal(button.title, 'Expand this please');
                         assert.equal(button.payload.content, '1');
                     })
                     .check.interaction({

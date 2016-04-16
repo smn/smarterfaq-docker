@@ -168,7 +168,11 @@ go.utils = {
         return msg.helper_metadata.messenger || {};
     },
 
-    dispatch_nlp: function (content, entities) {
+    dispatch_nlp: function (content, entities, opts) {
+        opts = _.defaults(opts || {}, {
+            fallback: 'states_fallback'
+        });
+
         if (!_.isEmpty(entities.action) && entities.action[0].value == 'helpdesk') {
             return {
                 name: 'states_helpdesk',
@@ -201,7 +205,7 @@ go.utils = {
         }
 
         return {
-            name: 'states_fallback',
+            name: opts.fallback,
             creator_opts: {
                 from_wit: true,
                 question: content,
@@ -350,7 +354,10 @@ go.app = function() {
 
             // If we receive first input text that looks like something
             // we should parse then dive straight in
-            if (self.im.msg.content && self.im.msg.content.match(/\w{5,}/i)) {
+            // NOTE: appending the space after content to make the Regex pass
+            //       because it's too early in the day to regex properly and
+            //       I'm tired
+            if (self.im.msg.content && (self.im.msg.content + ' ').match(/(\w+\s+){3}/)) {
                 content = self.im.msg.content;
                 return go.utils
                     .get_wit_converse(self.im, self.im.config.wit.token,

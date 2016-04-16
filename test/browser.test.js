@@ -76,7 +76,7 @@ describe("app", function() {
             it('should kick off the service rating', function () {
                 return tester
                     .inputs({
-                        content: 'service rating',
+                        content: 'service rating please',
                         session_event: 'new',
                     })
                     .check.interaction({
@@ -100,7 +100,7 @@ describe("app", function() {
             it('should return results if starting off with a question', function () {
                 return tester
                     .inputs({
-                        content: 'matching content',
+                        content: 'matching content please',
                         session_event: 'new',
                     })
                     .check.interaction({
@@ -113,7 +113,7 @@ describe("app", function() {
             it('should return the matches immediately if a match is found', function () {
                 return tester
                     .setup.user.state('states_nlp_intro')
-                    .input('matching content')
+                    .input('matching content please')
                     .check.reply(function (properties) {
                         md = properties.helper_metadata;
                         assert.equal(md.messenger.template_type, 'generic');
@@ -139,7 +139,7 @@ describe("app", function() {
                                 search_category: 'baby',
                                 search_topic: 'breastfeeding',
                             },
-                            question: 'matching content'
+                            question: 'matching content please'
                         }
                     })
                     .input('1')

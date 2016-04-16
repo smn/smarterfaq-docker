@@ -165,7 +165,11 @@ go.utils = {
         return msg.helper_metadata.messenger || {};
     },
 
-    dispatch_nlp: function (content, entities) {
+    dispatch_nlp: function (content, entities, opts) {
+        opts = _.defaults(opts || {}, {
+            fallback: 'states_fallback'
+        });
+
         if (!_.isEmpty(entities.action) && entities.action[0].value == 'helpdesk') {
             return {
                 name: 'states_helpdesk',
@@ -198,7 +202,7 @@ go.utils = {
         }
 
         return {
-            name: 'states_fallback',
+            name: opts.fallback,
             creator_opts: {
                 from_wit: true,
                 question: content,

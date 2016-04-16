@@ -13,7 +13,7 @@ module.exports = function () {
                 'params': {
                     'v': '20160330',
                     'session_id': '+27123456789',
-                    'q': 'service rating'
+                    'q': 'service rating please'
                 }
             },
             'response': {
@@ -73,7 +73,7 @@ module.exports = function () {
                 'params': {
                     'v': '20160330',
                     'session_id': '+27123456789',
-                    'q': 'matching content'
+                    'q': 'matching content please'
                 }
             },
             'response': {
@@ -149,7 +149,7 @@ module.exports = function () {
                             }, {
                                 "match": {
                                     "answer": {
-                                        "query": 'matching content',
+                                        "query": 'matching content please',
                                         "boost": 1
                                     }
                                 }

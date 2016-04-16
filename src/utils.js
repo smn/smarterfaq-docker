@@ -11,10 +11,6 @@ go.states = {
 
         opts = _.defaults(opts || {}, {
             helper_metadata: function () {
-                // just disable for now
-                if(true)
-                    return {};
-
                 if (opts.choices.length > 3) {
                     return {};
                 }

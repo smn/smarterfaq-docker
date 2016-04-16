@@ -92,7 +92,7 @@ describe("app", function() {
                     .start()
                     .check.interaction({
                         state: 'states_nlp_intro',
-                        reply: /What question can I help you with\?/
+                        reply: /Hello! Feel free to ask me a question/
                     })
                     .run();
             });
@@ -179,7 +179,7 @@ describe("app", function() {
                     .setup.user.state('states_end')
                     .check.interaction({
                         state: 'states_nlp_intro',
-                        reply: /Hello! What question can I help you with\?/
+                        reply: /Hello! Feel free to ask me a question/
                     })
                     .run();
             });

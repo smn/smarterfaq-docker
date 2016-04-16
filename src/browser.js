@@ -49,7 +49,7 @@ go.app = function() {
         self.states.add('states_nlp_intro', function (name) {
             return new FreeText(name, {
                 question: $('Hello! Feel free to ask me a question. ' +
-                            'If you get stuck just type "!reset" and '
+                            'If you get stuck just type "!reset" and ' +
                             'we\'ll start over'),
                 next: function (content) {
                     return go.utils

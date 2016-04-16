@@ -48,7 +48,9 @@ go.app = function() {
 
         self.states.add('states_nlp_intro', function (name) {
             return new FreeText(name, {
-                question: $('Hello! What question can I help you with?'),
+                question: $('Hello! Feel free to ask me a question. ' +
+                            'If you get stuck just type "!reset" and '
+                            'we\'ll start over'),
                 next: function (content) {
                     return go.utils
                         .get_wit_converse(self.im, self.im.config.wit.token, content)

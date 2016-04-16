@@ -30,10 +30,12 @@ go.states = {
                 return {
                     messenger: {
                         template_type: 'generic',
-                        title: i18n(opts.title),
-                        subtitle: subtitle,
-                        image_url: opts.image_url || '',
-                        buttons: buttons
+                        elements: [{
+                            title: i18n(opts.title),
+                            subtitle: subtitle,
+                            image_url: opts.image_url || '',
+                            buttons: buttons
+                        }]
                     }
                 };
             }

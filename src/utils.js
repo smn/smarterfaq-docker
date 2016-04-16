@@ -161,10 +161,23 @@ go.utils = {
         });
     },
 
+    get_user_profile: function(msg) {
+        return msg.helper_metadata.messenger || {};
+    },
+
     dispatch_nlp: function (content, entities) {
         if (!_.isEmpty(entities.action) && entities.action[0].value == 'helpdesk') {
             return {
                 name: 'states_helpdesk',
+                creator_opts: {
+                    question: content
+                }
+            };
+        }
+
+        if (!_.isEmpty(entities.action) && entities.action[0].value == 'servicerating') {
+            return {
+                name: 'states_servicerating',
                 creator_opts: {
                     question: content
                 }

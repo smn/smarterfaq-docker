@@ -1,5 +1,35 @@
 module.exports = function () {
     return [
+        // WIT converse response for service rating
+        {
+            'repeatable': true,
+            'request': {
+                'method': 'POST',
+                'headers': {
+                    'Authorization': ['Bearer token'],
+                    'Content-TYpe': ['application/json']
+                },
+                'url': 'https://api.wit.ai/converse',
+                'params': {
+                    'v': '20160330',
+                    'session_id': '+27123456789',
+                    'q': 'service rating'
+                }
+            },
+            'response': {
+                'code': '200',
+                'data': {
+                    "confidence" : 1,
+                    "type" : "merge",
+                    "entities" : {
+                        "action" : [{
+                            "value" : "servicerating"
+                        }]
+                    }
+                }
+            }
+        },
+
         // WIT converse response for helpdesk
         {
             'repeatable': true,

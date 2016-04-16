@@ -72,6 +72,20 @@ describe("app", function() {
             })
         });
 
+        describe('using Wit for service ratings', function () {
+            it('should kick off the service rating', function () {
+                return tester
+                    .inputs({
+                        content: 'service rating',
+                        session_event: 'new',
+                    })
+                    .check.interaction({
+                        states: 'states_servicerating',
+                    })
+                    .run();
+            });
+        });
+
         describe('using Wit for FAQ', function () {
             it('ask for the question', function () {
                 return tester

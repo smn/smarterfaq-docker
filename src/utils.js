@@ -156,6 +156,15 @@ go.utils = {
                 session_id: im.user.addr,
                 q: content
             }
+        }).then(function (response) {
+            return im
+                .log('WIT q', content)
+                .then(function () {
+                    return im.log('WIT response', response);
+                })
+                .then(function () {
+                    return response;
+                });
         });
     },
 
@@ -163,53 +172,60 @@ go.utils = {
         return msg.helper_metadata.messenger || {};
     },
 
-    dispatch_nlp: function (content, entities, opts) {
-        opts = _.defaults(opts || {}, {
-            fallback: 'states_fallback'
-        });
+    dispatch_nlp: function (im, content, entities, opts) {
+        return im
+            .log('WIT entities:', JSON.stringify(entities))
+            .then(function () {
+                opts = _.defaults(opts || {}, {
+                    fallback: 'states_fallback'
+                });
 
-        if (!_.isEmpty(entities.action) && entities.action[0].value == 'helpdesk') {
-            return {
-                name: 'states_helpdesk',
-                creator_opts: {
-                    question: content
+                if (!_.isEmpty(entities.action) && entities.action[0].value == 'helpdesk') {
+                    return {
+                        name: 'states_helpdesk',
+                        creator_opts: {
+                            question: content
+                        }
+                    };
                 }
-            };
-        }
 
-        if (!_.isEmpty(entities.action) && entities.action[0].value == 'servicerating') {
-            return {
-                name: 'states_servicerating',
-                creator_opts: {
-                    question: content
+                if (!_.isEmpty(entities.action) && entities.action[0].value == 'servicerating') {
+                    return {
+                        name: 'states_servicerating',
+                        creator_opts: {
+                            question: content
+                        }
+                    };
                 }
-            };
-        }
 
-        if (!_.isEmpty(entities.search_category)) {
-            return {
-                name: 'states_search',
-                creator_opts: {
-                    entities: {
-                        search_category: entities.search_category[0].value,
-                        search_topic: entities.search_topic[0].value,
-                    },
-                    question: content
+                if (!_.isEmpty(entities.search_category)) {
+                    return {
+                        name: 'states_search',
+                        creator_opts: {
+                            entities: {
+                                search_category: entities.search_category[0].value,
+                                search_topic: entities.search_topic[0].value,
+                            },
+                            question: content
+                        }
+                    };
                 }
-            };
-        }
 
-        return {
-            name: opts.fallback,
-            creator_opts: {
-                from_wit: true,
-                question: content,
-            }
-        };
-    },
-
-    train_wit: function () {
-        return Q();
+                return {
+                    name: opts.fallback,
+                    creator_opts: {
+                        from_wit: true,
+                        question: content,
+                    }
+                };
+            })
+            .then(function (data) {
+                return im
+                    .log('NLP dispatch:', data)
+                    .then(function() {
+                        return data;
+                    });
+            });
     },
 
     search_topics: function (im, es, opts) {
@@ -257,21 +273,6 @@ go.utils = {
         })
         .then(function (results) {
             return results.data.hits.hits;
-        });
-    },
-
-    get_wit_intent: function (im, token, content) {
-        var http = new JsonApi(im, {
-            headers: {
-                'Authorization': ['Bearer ' + token],
-                'Content-Type': ['application/json'],
-            }
-        });
-        return http.get('https://api.wit.ai/message?', {
-            params: {
-                v: '20141022',
-                q: content
-            }
         });
     },
 

@@ -158,9 +158,9 @@ go.utils = {
             }
         }).then(function (response) {
             return im
-                .log('WIT q', content)
+                .log('WIT q: ' + content)
                 .then(function () {
-                    return im.log('WIT response', response);
+                    return im.log('WIT response: ' + JSON.stringify(response.data));
                 })
                 .then(function () {
                     return response;
@@ -174,7 +174,7 @@ go.utils = {
 
     dispatch_nlp: function (im, content, entities, opts) {
         return im
-            .log('WIT entities:', JSON.stringify(entities))
+            .log('WIT entities: ' + JSON.stringify(entities))
             .then(function () {
                 opts = _.defaults(opts || {}, {
                     fallback: 'states_fallback'
@@ -221,7 +221,7 @@ go.utils = {
             })
             .then(function (data) {
                 return im
-                    .log('NLP dispatch:', data)
+                    .log('NLP dispatch:' + JSON.stringify(data))
                     .then(function() {
                         return data;
                     });

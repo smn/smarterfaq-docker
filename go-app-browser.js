@@ -337,6 +337,7 @@ go.app = function() {
     var MessengerPaginatedState = go.states.MessengerPaginatedState;
     var MessengerChoiceState = go.states.MessengerChoiceState;
     var ChoiceState = vumigo.states.ChoiceState;
+    var PaginatedChoiceState = vumigo.states.PaginatedChoiceState;
 
     var GoFAQBrowser = App.extend(function(self) {
         App.call(self, 'states_nlp');
@@ -740,7 +741,7 @@ go.app = function() {
                                 return new Choice(d.id, d.question);
                             });
 
-                        return new ChoiceState(name, {
+                        return new PaginatedChoiceState(name, {
                             question: $('Please choose a question:'),
                             choices: choices,
                             characters_per_page: 320,

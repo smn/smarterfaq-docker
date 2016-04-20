@@ -30,7 +30,7 @@ go.app = function() {
             // NOTE: appending the space after content to make the Regex pass
             //       because it's too early in the day to regex properly and
             //       I'm tired
-            if (self.im.msg.content && (self.im.msg.content + ' ').match(/(\w+\s+){3}/)) {
+            if (go.utils.is_questionish(self.im.msg.content)) {
                 content = self.im.msg.content;
                 return go.utils
                     .get_wit_converse(self.im, self.im.config.wit.token,
@@ -56,6 +56,11 @@ go.app = function() {
                             'If you get stuck just type "!reset" and ' +
                             'we\'ll start over'),
                 next: function (content) {
+
+                    if(!go.utils.is_questionish(content)) {
+                        return 'states_nlp_intro';
+                    }
+
                     return go.utils
                         .get_wit_converse(self.im, self.im.config.wit.token, content)
                         .then(function (results) {

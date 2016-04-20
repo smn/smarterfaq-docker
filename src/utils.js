@@ -90,6 +90,10 @@ go.states = {
 
 go.utils = {
 
+    is_questionish: function (content) {
+        return content && (content + ' ').match(/(\w+\s+){3}/);
+    },
+
     // Shared utils lib
     is_out_of_hours: function(config) {
         var today = go.utils.get_today(config);

@@ -43,7 +43,7 @@ module.exports = function () {
                 'params': {
                     'v': '20160330',
                     'session_id': '+27123456789',
-                    'q': 'helpdesk please'
+                    'q': 'give me helpdesk please'
                 }
             },
             'response': {

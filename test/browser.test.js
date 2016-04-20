@@ -54,7 +54,7 @@ describe("app", function() {
             it('should ask the question for the helpdesk', function () {
                 return tester
                     .setup.user.state('states_nlp_intro')
-                    .input('helpdesk please')
+                    .input('give me helpdesk please')
                     .check.interaction({
                         reply: /What is your question for the helpdesk\?/i
                     })

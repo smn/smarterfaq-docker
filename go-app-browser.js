@@ -565,6 +565,7 @@ go.app = function() {
                                   ? ''
                                   : ' ' + self.user_profile.first_name)
                 }),
+                accept_labels: true,
 
                 choices: [
                     new Choice('very-satisfied', $('Very Satisfied')),
@@ -581,6 +582,7 @@ go.app = function() {
             return new MessengerChoiceState(name, {
                 title: 'Service Rating',
                 question: $('How do you feel about the time you had to wait at the facility?'),
+                accept_labels: true,
 
                 choices: [
                     new Choice('very-satisfied', $('Very Satisfied')),
@@ -597,6 +599,7 @@ go.app = function() {
             return new MessengerChoiceState(name, {
                 title: 'Service Rating',
                 question: $('How long did you wait to be helped at the clinic?'),
+                accept_labels: true,
 
                 choices: [
                     new Choice('less-than-an-hour', $('Less than an hour')),
@@ -613,6 +616,7 @@ go.app = function() {
             return new MessengerChoiceState(name, {
                 title: 'Service Rating',
                 question: $('Was the facility clean?'),
+                accept_labels: true,
 
                 choices: [
                     new Choice('very-satisfied', $('Very Satisfied')),
@@ -629,6 +633,7 @@ go.app = function() {
             return new MessengerChoiceState(name, {
                 title: 'Service Rating',
                 question: $('Did you feel that your privacy was respected by the staff?'),
+                accept_labels: true,
 
                 choices: [
                     new Choice('very-satisfied', $('Very Satisfied')),
@@ -682,6 +687,7 @@ go.app = function() {
                         choices: choices,
                         characters_per_page: 320,
                         options_per_page: 8,
+                        accept_labels: true,
                         next: function (choice) {
                             return {
                                 name: 'states_topics',
@@ -719,6 +725,7 @@ go.app = function() {
                         choices: choices,
                         characters_per_page: 320,
                         options_per_page: 8,
+                        accept_labels: true,
                         next: function(choice) {
                             return {
                                 name: 'states_questions',
@@ -754,6 +761,7 @@ go.app = function() {
                             question: $('Please choose a question:'),
                             choices: choices,
                             characters_per_page: 320,
+                            accept_labels: true,
                             options_per_page: null,
                             next: function(choice) {
                                 var question_id = choice.value;
